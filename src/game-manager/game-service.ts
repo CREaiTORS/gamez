@@ -8,16 +8,17 @@ export type GameState = Record<string, any>;
 
 export enum GameEvents {
   SESSION = "session",
-  GAME_STARTED = "session.game-started",
+  GAME_ACTIVE = "session.active",
+  GAME_PAUSE = "session.pause",
   GAME_OVER = "session.game-over",
   STATE = "state",
   STATE_INIT = "state.init",
   STATE_UPDATE = "state.update",
-  COLLECT_RESULT = "collect-result",
+  UPDATE_RESULT = "result.update",
 }
 
 export class GameService extends EventEmitter2 {
-  private status: "initialized" | "active" | "paused" | "game-over";
+  private session: "initialized" | "active" | "paused" | "game-over";
   private state: GameState;
   private results: object[];
   private currLevel: number;
@@ -26,13 +27,16 @@ export class GameService extends EventEmitter2 {
   debug(...x: any[]) {
     console.info(`[${this.name}]:`, ...x);
   }
+  warn(...x: any[]) {
+    console.warn(`[${this.name}]:`, ...x);
+  }
 
   constructor(public name: string, public levels: any[], public assets: Record<string, string> = {}) {
     super({ wildcard: true, verboseMemoryLeak: true, newListener: true, removeListener: true, delimiter: "." });
 
     this.name = name;
     this.results = [];
-    this.status = "initialized";
+    this.session = "initialized";
     this.state = {};
     this.currLevel = 0;
     this.assetsPreloaded = false;
@@ -65,6 +69,10 @@ export class GameService extends EventEmitter2 {
     return this.currLevel;
   }
 
+  nextLevel() {
+    this.currLevel = this.currLevel + 1;
+  }
+
   getCurrentLevelDetails() {
     return this.levels[this.currLevel];
   }
@@ -86,38 +94,54 @@ export class GameService extends EventEmitter2 {
   }
 
   addStateListener(listener: ListenerFn) {
-    return this.on("state", listener, { objectify: true }) as Listener;
+    return this.on(GameEvents.STATE, listener, { objectify: true }) as Listener;
   }
 
-  getStatus() {
-    return this.status;
+  getSession() {
+    return this.session;
   }
 
-  useStatus() {
+  useSession() {
     return useSyncExternalStore((cb) => {
       this.on(GameEvents.SESSION, cb);
       return () => this.off(GameEvents.SESSION, cb);
-    }, this.getStatus);
+    }, this.getSession);
   }
 
   startSession() {
-    this.status = "active";
-    this.emit(GameEvents.GAME_STARTED, this.status);
+    if (this.session !== "initialized") {
+      return this.warn("reset session before starting");
+    }
+
+    this.session = "active";
+    this.emit(GameEvents.GAME_ACTIVE);
   }
 
   pauseSession() {
-    this.status = "paused";
-    this.emit(GameEvents.SESSION, this.status);
+    this.session = "paused";
+    this.emit(GameEvents.GAME_PAUSE);
   }
 
   resumeSession() {
-    this.status = "active";
-    this.emit(GameEvents.SESSION, this.status);
+    this.session = "active";
+    this.emit(GameEvents.GAME_ACTIVE);
   }
 
-  endSession() {
-    this.status = "game-over";
-    this.emit(GameEvents.GAME_OVER, this.status);
+  endSession(result: ResultType) {
+    this.session = "game-over";
+
+    this.emit(GameEvents.GAME_OVER, result);
+  }
+
+  resetSession() {
+    this.session = "initialized";
+    this.removeAllListeners(GameEvents.STATE);
+    this.removeAllListeners(GameEvents.UPDATE_RESULT);
+    this.removeAllListeners(GameEvents.SESSION);
+  }
+
+  onSessionEnd(fn: (result: ResultType) => void) {
+    this.addListener(GameEvents.GAME_OVER, fn);
   }
 
   addSessionListener(listener: ListenerFn) {
@@ -129,17 +153,17 @@ export class GameService extends EventEmitter2 {
   }
 
   async collectResult(result = {}) {
-    if (this.status === "active") {
-      await this.emitAsync(GameEvents.COLLECT_RESULT, result);
+    if (this.session === "game-over") {
+      await this.emitAsync(GameEvents.UPDATE_RESULT, result);
       this.results.push(result);
     } else {
-      this.debug("Cannot collect result, game is not active");
+      this.debug("Cannot collect result, game is not over");
     }
 
     return result;
   }
 
   updateResult(listener: (result: object) => object) {
-    return this.on(GameEvents.COLLECT_RESULT, listener);
+    return this.on(GameEvents.UPDATE_RESULT, listener);
   }
 }
