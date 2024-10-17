@@ -1,0 +1,27 @@
+{
+  "name": "gamez",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "vite --host 0.0.0.0 --port 3000",
+    "preview": "vite preview --host 0.0.0.0 --port 3000",
+    "test": ""
+  },
+  "dependencies": {
+    "axios": "^1.6.3",
+    "clsx": "^2.1.0",
+    "eventemitter2": "^6.4.9",
+    "framer-motion": "^11.0.8",
+    "howler": "^2.2.4",
+    "react": "^18.3.1",
+    "react-icons": "^4.12.0",
+    "tailwind-merge": "^2.2.0",
+    "zustand": "^5.0.0-rc.2"
+  },
+  "devDependencies": {
+    "@types/howler": "^2.2.11",
+    "@types/react": "^18.2.46"
+  }
+}
