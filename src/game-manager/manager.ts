@@ -7,13 +7,17 @@ export class Manager<T extends string = string> {
     this.gamesService = {} as any;
   }
 
-  getGameService(name: T) {
+  getGame(name: T) {
     if (this.gamesService[name]) return this.gamesService[name];
 
     throw new Error(`Game '${name}' is not added.`);
   }
 
-  addGameService(name: T, game: GameService) {
+  getAllGames() {
+    return Object.values(this.gamesService) as GameService[];
+  }
+
+  addGame(name: T, game: GameService) {
     this.gamesService[name] = game;
   }
 
@@ -22,7 +26,7 @@ export class Manager<T extends string = string> {
   }
 
   preloadGamesAssets() {
-    return Promise.allSettled((Object.values(this.gamesService) as GameService[]).map((game) => game.preloadAssets()));
+    return Promise.allSettled(this.getAllGames().map((game) => game.preloadAssets()));
   }
 
   getResults() {
