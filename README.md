@@ -57,12 +57,12 @@ gs.resumeSession();
 
 // do your work
 // call endSession to end the game session
-// gameResult = "success" | "error" | "timeout"
-gs.endSession(gameResult);
+// resultStatus = "success" | "error" | "timeout"
+gs.endSession(resultStatus);
 // after end session any updates will be rejected
 
-// you can attach listeners for session end
-gs.onSessionEnd((gameResult) => {
+// you can attach listeners for session end, listener will receive resultStatus as argument
+gs.onSessionEnd((resultStatus) => {
   // do you work
 
   // you should call collectResult after en
