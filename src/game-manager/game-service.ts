@@ -8,17 +8,18 @@ export type GameState = Record<string, any>;
 
 export enum GameEvents {
   SESSION = "session",
-  GAME_ACTIVE = "session.active",
-  GAME_PAUSE = "session.pause",
-  GAME_OVER = "session.game-over",
+  SESSION_ACTIVE = "session.active",
+  SESSION_PAUSE = "session.pause",
+  SESSION_COMPLETE = "session.complete",
   STATE = "state",
   STATE_INIT = "state.init",
   STATE_UPDATE = "state.update",
-  UPDATE_RESULT = "result.update",
+  RESULT = "result",
+  RESULT_UPDATE = "result.update",
 }
 
 export class GameService extends EventEmitter2 {
-  private session: "initialized" | "active" | "paused" | "game-over";
+  private session: "initialized" | "active" | "paused" | "complete";
   private state: GameState;
   private results: object[];
   private currLevel: number;
@@ -114,34 +115,35 @@ export class GameService extends EventEmitter2 {
     }
 
     this.session = "active";
-    this.emit(GameEvents.GAME_ACTIVE);
+    this.emit(GameEvents.SESSION_ACTIVE);
   }
 
   pauseSession() {
     this.session = "paused";
-    this.emit(GameEvents.GAME_PAUSE);
+    this.emit(GameEvents.SESSION_PAUSE);
   }
 
   resumeSession() {
     this.session = "active";
-    this.emit(GameEvents.GAME_ACTIVE);
+    this.emit(GameEvents.SESSION_ACTIVE);
   }
 
   endSession(result: ResultType) {
-    this.session = "game-over";
+    this.session = "complete";
 
-    this.emit(GameEvents.GAME_OVER, result);
+    this.emit(GameEvents.SESSION_COMPLETE, result);
   }
 
   resetSession() {
     this.session = "initialized";
     this.removeAllListeners(GameEvents.STATE);
-    this.removeAllListeners(GameEvents.UPDATE_RESULT);
+    this.removeAllListeners(GameEvents.RESULT_UPDATE);
     this.removeAllListeners(GameEvents.SESSION);
+    this.removeAllListeners();
   }
 
   onSessionEnd(fn: (result: ResultType) => void) {
-    this.addListener(GameEvents.GAME_OVER, fn);
+    this.addListener(GameEvents.SESSION_COMPLETE, fn);
   }
 
   addSessionListener(listener: ListenerFn) {
@@ -153,17 +155,17 @@ export class GameService extends EventEmitter2 {
   }
 
   async collectResult(result = {}) {
-    if (this.session === "game-over") {
-      await this.emitAsync(GameEvents.UPDATE_RESULT, result);
+    if (this.session === "complete") {
+      await this.emitAsync(GameEvents.RESULT_UPDATE, result);
       this.results.push(result);
     } else {
-      this.debug("Cannot collect result, game is not over");
+      this.debug("Cannot collect result, session is not complete");
     }
 
     return result;
   }
 
   updateResult(listener: (result: object) => object) {
-    return this.on(GameEvents.UPDATE_RESULT, listener);
+    return this.on(GameEvents.RESULT_UPDATE, listener);
   }
 }
