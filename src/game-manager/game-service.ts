@@ -7,14 +7,14 @@ export type GameListner = Omit<Listener, "emitter"> & { emitter: GameService };
 export type GameState = Record<string, any>;
 
 export enum GameEvents {
-  SESSION = "session",
+  SESSION = "session.**",
   SESSION_ACTIVE = "session.active",
   SESSION_PAUSE = "session.pause",
   SESSION_END = "session.end",
-  STATE = "state",
+  STATE = "state.**",
   STATE_INIT = "state.init",
   STATE_UPDATE = "state.update",
-  RESULT = "result",
+  RESULT = "result.**",
   RESULT_UPDATE = "result.update",
 }
 
@@ -92,8 +92,8 @@ export class GameService extends EventEmitter2 {
 
   useGameState() {
     return useSyncExternalStore((cb) => {
-      this.on(GameEvents.STATE, cb);
-      return () => this.off(GameEvents.STATE, cb);
+      const listener = this.addStateListener(cb);
+      return () => listener.off();
     }, this.getState.bind(this));
   }
 
@@ -107,8 +107,8 @@ export class GameService extends EventEmitter2 {
 
   useSession() {
     return useSyncExternalStore((cb) => {
-      this.on(GameEvents.SESSION, cb);
-      return () => this.off(GameEvents.SESSION, cb);
+      const listener = this.addSessionListener(cb);
+      return () => listener.off();
     }, this.getSession.bind(this));
   }
 
@@ -143,12 +143,12 @@ export class GameService extends EventEmitter2 {
     this.state = {};
   }
 
-  addSessionListener(listener: ListenerFn) {
-    return this.on("session", listener);
+  addSessionListener(fn: ListenerFn) {
+    return this.on(GameEvents.SESSION, fn, { objectify: true }) as Listener;
   }
 
   addSessionEndListner(fn: (result: ResultType) => void) {
-    this.addListener(GameEvents.SESSION_END, fn);
+    this.on(GameEvents.SESSION_END, fn, { objectify: true }) as Listener;
   }
 
   getResults() {
@@ -166,7 +166,7 @@ export class GameService extends EventEmitter2 {
     return result;
   }
 
-  updateResult(listener: (result: object) => object) {
-    return this.on(GameEvents.RESULT_UPDATE, listener);
+  updateResult(fn: (result: object) => object) {
+    return this.on(GameEvents.RESULT_UPDATE, fn);
   }
 }
