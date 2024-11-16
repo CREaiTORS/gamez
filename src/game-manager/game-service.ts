@@ -10,7 +10,7 @@ export enum GameEvents {
   SESSION = "session",
   SESSION_ACTIVE = "session.active",
   SESSION_PAUSE = "session.pause",
-  SESSION_COMPLETE = "session.complete",
+  SESSION_END = "session.end",
   STATE = "state",
   STATE_INIT = "state.init",
   STATE_UPDATE = "state.update",
@@ -19,7 +19,7 @@ export enum GameEvents {
 }
 
 export class GameService extends EventEmitter2 {
-  private session: "initialized" | "active" | "paused" | "complete";
+  private session: "initialized" | "active" | "paused" | "end";
   private state: GameState;
   private results: object[];
   private currLevel: number;
@@ -35,12 +35,15 @@ export class GameService extends EventEmitter2 {
   constructor(public name: string, public levels: any[], public assets: Record<string, string> = {}) {
     super({ wildcard: true, verboseMemoryLeak: true, newListener: true, removeListener: true, delimiter: "." });
 
+    // for entire game
     this.name = name;
     this.results = [];
-    this.session = "initialized";
-    this.state = {};
     this.currLevel = 0;
     this.assetsPreloaded = false;
+
+    // session
+    this.state = {};
+    this.session = "initialized";
   }
 
   initState(state: GameState) {
@@ -62,24 +65,24 @@ export class GameService extends EventEmitter2 {
     this.assetsPreloaded = true;
   }
 
-  getState() {
-    this.state;
-  }
-
   getCurrLevel() {
     return this.currLevel;
+  }
+
+  isGameComplete() {
+    return this.currLevel >= this.levels.length;
+  }
+
+  getCurrLevelDetails() {
+    return this.levels[this.currLevel];
   }
 
   nextLevel() {
     this.currLevel = this.currLevel + 1;
   }
 
-  getCurrentLevelDetails() {
-    return this.levels[this.currLevel];
-  }
-
-  isGameComplete() {
-    return this.currLevel >= this.levels.length;
+  getState() {
+    return this.state;
   }
 
   updateState(state: Partial<GameState>) {
@@ -91,7 +94,7 @@ export class GameService extends EventEmitter2 {
     return useSyncExternalStore((cb) => {
       this.on(GameEvents.STATE, cb);
       return () => this.off(GameEvents.STATE, cb);
-    }, this.getState);
+    }, this.getState.bind(this));
   }
 
   addStateListener(listener: ListenerFn) {
@@ -106,7 +109,7 @@ export class GameService extends EventEmitter2 {
     return useSyncExternalStore((cb) => {
       this.on(GameEvents.SESSION, cb);
       return () => this.off(GameEvents.SESSION, cb);
-    }, this.getSession);
+    }, this.getSession.bind(this));
   }
 
   startSession() {
@@ -129,25 +132,23 @@ export class GameService extends EventEmitter2 {
   }
 
   endSession(result: ResultType) {
-    this.session = "complete";
+    this.session = "end";
 
-    this.emit(GameEvents.SESSION_COMPLETE, result);
+    this.emit(GameEvents.SESSION_END, result);
   }
 
   resetSession() {
-    this.session = "initialized";
-    this.removeAllListeners(GameEvents.STATE);
-    this.removeAllListeners(GameEvents.RESULT_UPDATE);
-    this.removeAllListeners(GameEvents.SESSION);
     this.removeAllListeners();
-  }
-
-  onSessionEnd(fn: (result: ResultType) => void) {
-    this.addListener(GameEvents.SESSION_COMPLETE, fn);
+    this.session = "initialized";
+    this.state = {};
   }
 
   addSessionListener(listener: ListenerFn) {
     return this.on("session", listener);
+  }
+
+  addSessionEndListner(fn: (result: ResultType) => void) {
+    this.addListener(GameEvents.SESSION_END, fn);
   }
 
   getResults() {
@@ -155,11 +156,11 @@ export class GameService extends EventEmitter2 {
   }
 
   async collectResult(result = {}) {
-    if (this.session === "complete") {
+    if (this.session === "end") {
       await this.emitAsync(GameEvents.RESULT_UPDATE, result);
       this.results.push(result);
     } else {
-      this.debug("Cannot collect result, session is not complete");
+      this.debug("Cannot collect result, session is active");
     }
 
     return result;
