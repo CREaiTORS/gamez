@@ -14,14 +14,14 @@ export enum GameEvents {
   STATE = "state.**",
   STATE_INIT = "state.init",
   STATE_UPDATE = "state.update",
-  RESULT = "result.**",
-  RESULT_UPDATE = "result.update",
+  REPORT = "report.**",
+  REPORT_UPDATE = "report.update",
 }
 
 export class GameService extends EventEmitter2 {
   private session: "initialized" | "active" | "paused" | "end";
   private state: GameState;
-  private results: object[];
+  private reports: object[];
   private currLevel: number;
   assetsPreloaded: boolean;
 
@@ -37,7 +37,7 @@ export class GameService extends EventEmitter2 {
 
     // for entire game
     this.name = name;
-    this.results = [];
+    this.reports = [];
     this.currLevel = 0;
     this.assetsPreloaded = false;
 
@@ -46,11 +46,13 @@ export class GameService extends EventEmitter2 {
     this.session = "initialized";
   }
 
+  // initial value of your state, like settings remaining lives to available lives, or score to zero.
   initState(state: GameState) {
     this.state = state;
     this.emit(GameEvents.STATE_INIT, this.state);
   }
 
+  // load your assets like img, video, sound, etc
   async preloadAssets() {
     if (this.assetsPreloaded) return Promise.resolve();
 
@@ -69,6 +71,7 @@ export class GameService extends EventEmitter2 {
     return this.currLevel;
   }
 
+  // game is complete when no more levels are left
   isGameComplete() {
     return this.currLevel >= this.levels.length;
   }
@@ -77,10 +80,12 @@ export class GameService extends EventEmitter2 {
     return this.levels[this.currLevel];
   }
 
+  // move to the next level
   nextLevel() {
     this.currLevel = this.currLevel + 1;
   }
 
+  // get state of the session, state is just internal values like score, remaining lives etc
   getState() {
     return this.state;
   }
@@ -90,6 +95,7 @@ export class GameService extends EventEmitter2 {
     this.emit(GameEvents.STATE_UPDATE, this.state);
   }
 
+  // use this when you want to update the component when the state changes
   useGameState() {
     return useSyncExternalStore((cb) => {
       const listener = this.addStateListener(cb);
@@ -97,8 +103,9 @@ export class GameService extends EventEmitter2 {
     }, this.getState.bind(this));
   }
 
-  addStateListener(listener: ListenerFn) {
-    return this.on(GameEvents.STATE, listener, { objectify: true }) as Listener;
+  // fn will be called when the state changes
+  addStateListener(fn: ListenerFn) {
+    return this.on(GameEvents.STATE, fn, { objectify: true }) as Listener;
   }
 
   getSession() {
@@ -131,12 +138,14 @@ export class GameService extends EventEmitter2 {
     this.emit(GameEvents.SESSION_ACTIVE);
   }
 
+  // when the session ends call this function with the result of the session
   endSession(result: ResultType) {
     this.session = "end";
 
     this.emit(GameEvents.SESSION_END, result);
   }
 
+  // to be called before moving to the next session
   resetSession() {
     this.removeAllListeners();
     this.session = "initialized";
@@ -151,22 +160,32 @@ export class GameService extends EventEmitter2 {
     this.on(GameEvents.SESSION_END, fn, { objectify: true }) as Listener;
   }
 
-  getResults() {
-    return this.results;
+  // all your stored reports
+  getReports() {
+    return this.reports;
   }
 
-  async collectResult(result = {}) {
+  // based on session result you may choose to save
+  saveReport(report: any) {
+    this.reports.push(report);
+  }
+
+  // when session ends you need to collect report.
+  // report is data collected from the session.
+  // collectReport will call reportUpdater and collect report, but it will not save report, you have to do it yourself
+  async collectReport(initialReport = {}) {
     if (this.session === "end") {
-      await this.emitAsync(GameEvents.RESULT_UPDATE, result);
-      this.results.push(result);
+      // initialReport will be updated by reportUpdater
+      await this.emitAsync(GameEvents.REPORT_UPDATE, initialReport);
     } else {
-      this.debug("Cannot collect result, session is active");
+      this.warn("Cannot collect report, session is still active");
     }
 
-    return result;
+    return initialReport;
   }
 
-  updateResult(fn: (result: object) => object) {
-    return this.on(GameEvents.RESULT_UPDATE, fn);
+  // it will be called by collectReport, this function accepts a updater function which updates the report
+  reportUpdater(fn: (report: object) => object) {
+    return this.on(GameEvents.REPORT_UPDATE, fn);
   }
 }
