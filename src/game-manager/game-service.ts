@@ -16,13 +16,30 @@ export enum GameEvents {
   STATE_UPDATE = "state.update",
   REPORT = "report.**",
   REPORT_UPDATE = "report.update",
+  RESULT = "result.**",
+  RESULT_SUCCESS = "result.success",
+  RESULT_ERROR = "result.error",
+  RESULT_TIMEOUT = "result.timeout",
 }
 
 export class GameService extends EventEmitter2 {
+  // store the session, either initialized, active, paused or ended.
+  // This is useful for tracking the current state of the game.
+  // For example, you have to stop the game when it's ended, you have to pause the game when it's paused.
+  // initialized is before the start of the game
+  // active is when the game is running
+  // paused is when the game is paused for some reason
+  // end is when the game is finished this could be because of success, error, timeout
   private session: "initialized" | "active" | "paused" | "end";
+  // store the state of the session
   private state: GameState;
+  // stores the report of previous sessions
   private reports: object[];
+  // current level index in levels array
   private currLevel: number;
+  // store the result of the session
+  private result: ResultType;
+
   assetsPreloaded: boolean;
 
   debug(...x: any[]) {
@@ -42,6 +59,7 @@ export class GameService extends EventEmitter2 {
     this.assetsPreloaded = false;
 
     // session
+    this.result = "";
     this.state = {};
     this.session = "initialized";
   }
@@ -112,6 +130,10 @@ export class GameService extends EventEmitter2 {
     return this.session;
   }
 
+  addSessionListener(fn: ListenerFn) {
+    return this.on(GameEvents.SESSION, fn, { objectify: true }) as Listener;
+  }
+
   useSession() {
     return useSyncExternalStore((cb) => {
       const listener = this.addSessionListener(cb);
@@ -139,10 +161,23 @@ export class GameService extends EventEmitter2 {
   }
 
   // when the session ends call this function with the result of the session
-  endSession(result: ResultType) {
+  endSession(result: Exclude<ResultType, "">) {
     this.session = "end";
+    this.result = result;
+
+    if (result === "error") {
+      this.emit(GameEvents.RESULT_ERROR);
+    } else if (result === "success") {
+      this.emit(GameEvents.RESULT_SUCCESS);
+    } else if (result === "timeout") {
+      this.emit(GameEvents.RESULT_TIMEOUT);
+    }
 
     this.emit(GameEvents.SESSION_END, result);
+  }
+
+  addSessionEndListner(fn: (result: ResultType) => void) {
+    this.on(GameEvents.SESSION_END, fn, { objectify: true }) as Listener;
   }
 
   // to be called before moving to the next session
@@ -150,14 +185,22 @@ export class GameService extends EventEmitter2 {
     this.removeAllListeners();
     this.session = "initialized";
     this.state = {};
+    this.result = "";
   }
 
-  addSessionListener(fn: ListenerFn) {
-    return this.on(GameEvents.SESSION, fn, { objectify: true }) as Listener;
+  getResult() {
+    return this.result;
   }
 
-  addSessionEndListner(fn: (result: ResultType) => void) {
-    this.on(GameEvents.SESSION_END, fn, { objectify: true }) as Listener;
+  addResultListener(fn: ListenerFn) {
+    return this.on(GameEvents.RESULT, fn, { objectify: true }) as Listener;
+  }
+
+  useResult() {
+    return useSyncExternalStore((cb) => {
+      const listener = this.addResultListener(cb);
+      return () => listener.off();
+    }, this.getResult.bind(this));
   }
 
   // all your stored reports
