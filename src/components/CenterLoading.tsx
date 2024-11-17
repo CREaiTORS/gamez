@@ -7,7 +7,7 @@ interface props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const CenterLoading: React.FC<props> = ({ className, size = 72, ...props }) => (
-  <div className={twMerge("c full", className)} {...props}>
+  <div className={twMerge("h-full w-full flex items-center justify-center", className)} {...props}>
     <PiSpinnerBold size={size} className="animate-spin" />
   </div>
 );
