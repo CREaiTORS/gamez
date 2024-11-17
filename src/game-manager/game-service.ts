@@ -63,14 +63,12 @@ export class GameService extends EventEmitter2 {
     this.state = {};
     this.session = "initialized";
   }
-
-  // initial value of your state, like settings remaining lives to available lives, or score to zero.
+  /** initial value of your state, like settings remaining lives to available lives, or score to zero. */
   initState(state: GameState) {
     this.state = state;
     this.emit(GameEvents.STATE_INIT, this.state);
   }
-
-  // load your assets like img, video, sound, etc
+  /** load your assets like img, video, sound, etc */
   async preloadAssets() {
     if (this.assetsPreloaded) return Promise.resolve();
 
@@ -89,7 +87,7 @@ export class GameService extends EventEmitter2 {
     return this.currLevel;
   }
 
-  // game is complete when no more levels are left
+  /** game is complete when no more levels are left */
   isGameComplete() {
     return this.currLevel >= this.levels.length;
   }
@@ -103,7 +101,7 @@ export class GameService extends EventEmitter2 {
     this.currLevel = this.currLevel + 1;
   }
 
-  // get state of the session, state is just internal values like score, remaining lives etc
+  /** get state of the session, state is just internal values like score, remaining lives etc */
   getState() {
     return this.state;
   }
@@ -113,7 +111,7 @@ export class GameService extends EventEmitter2 {
     this.emit(GameEvents.STATE_UPDATE, this.state);
   }
 
-  // use this when you want to update the component when the state changes
+  /** use this when you want to update the component when the state changes */
   useGameState() {
     return useSyncExternalStore((cb) => {
       const listener = this.addStateListener(cb);
@@ -121,7 +119,7 @@ export class GameService extends EventEmitter2 {
     }, this.getState.bind(this));
   }
 
-  // fn will be called when the state changes
+  /** fn will be called when the state changes */
   addStateListener(fn: ListenerFn) {
     return this.on(GameEvents.STATE, fn, { objectify: true }) as Listener;
   }
@@ -208,18 +206,28 @@ export class GameService extends EventEmitter2 {
     return this.reports;
   }
 
-  // based on session result you may choose to save
+  /** based on session result you may choose to save */
   saveReport(report: any) {
     this.reports.push(report);
   }
 
-  // when session ends you need to collect report.
-  // report is data collected from the session.
-  // collectReport will call reportUpdater and collect report, but it will not save report, you have to do it yourself
-  async collectReport(initialReport = {}) {
+  /**   
+  when session ends you need to collect report.
+  report is data collected from the session.
+  collectReport will call reportUpdater and collect report, but it will not save report, you have to do it yourself
+
+  @example
+    gs.reportUpdater(() => ({ a: 1 }));
+    gs.reportUpdater(() => ({ a: 2 }));
+    gs.reportUpdater((x) => ({ b: 3, c: x.a + 2 }));
+  
+    const report = gs.collectReport();
+    console.log(report); // { a: 2, b: 3, c: 4 }
+  */
+  collectReport(initialReport = {}) {
     if (this.session === "end") {
       // initialReport will be updated by reportUpdater
-      await this.emitAsync(GameEvents.REPORT_UPDATE, initialReport);
+      this.emitAsync(GameEvents.REPORT_UPDATE, initialReport);
     } else {
       this.warn("Cannot collect report, session is still active");
     }
@@ -227,8 +235,21 @@ export class GameService extends EventEmitter2 {
     return initialReport;
   }
 
-  // it will be called by collectReport, this function accepts a updater function which updates the report
-  reportUpdater(fn: (report: object) => object) {
-    return this.on(GameEvents.REPORT_UPDATE, fn);
+  /**
+  this function is used to update the report when collectReport is called
+  this function accepts a updater function which updates the report
+  
+  @example
+    gs.reportUpdater(() => ({ a: 1 }));
+    gs.reportUpdater(() => ({ a: 2 }));
+    gs.reportUpdater((x) => ({ b: 3, c: x.a + 2 }));
+  
+    const report = gs.collectReport();
+    console.log(report); // { a: 2, b: 3, c: 4 }
+  */
+  reportUpdater(fn: (report: any) => any) {
+    return this.on(GameEvents.REPORT_UPDATE, (x) => {
+      Object.assign(x, fn(x));
+    });
   }
 }
