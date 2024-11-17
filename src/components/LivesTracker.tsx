@@ -5,22 +5,17 @@ export function Heart({ filled = false }) {
 }
 
 export interface LivesTrackerProps {
-  lives: number;
-  avlLives: number;
+  totalLives: number;
+  remainingLives: number;
 }
 
-export function LivesTracker({ avlLives, lives }: LivesTrackerProps) {
+export function LivesTracker({ remainingLives, totalLives }: LivesTrackerProps) {
   return (
-    <div className="flex flex-row gap-2">
-      {Array(lives)
+    <div className="flex flex-row-reverse gap-2">
+      {Array(totalLives)
         .fill(0)
         .map((_, index) => (
-          <Heart key={index} filled={index < avlLives} />
-        ))}
-      {Array(avlLives - lives)
-        .fill(0)
-        .map((_, index) => (
-          <Heart key={lives + index} />
+          <Heart key={index} filled={index < remainingLives} />
         ))}
     </div>
   );
