@@ -13,3 +13,11 @@ export function ComponentRefresh({ children }: React.PropsWithChildren) {
 }
 
 export const useComponentRefresh = () => useContext(Context).onRefresh;
+
+export function wrapWithComponentRefresh(Component: React.FC) {
+  return (
+    <ComponentRefresh>
+      <Component />
+    </ComponentRefresh>
+  );
+}
