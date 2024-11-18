@@ -4,5 +4,6 @@ export * from "./CenterLoading";
 export * from "./ComponentRefresh";
 export * from "./Editor";
 export * from "./ErrorBoundary";
+export * from "./GameServiceWrapper";
 export * from "./LivesTracker";
 export * from "./Spinner";
