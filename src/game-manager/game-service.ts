@@ -158,7 +158,7 @@ export class GameService extends EventEmitter2 {
     this.emit(GameEvents.SESSION_ACTIVE);
   }
 
-  // when the session ends call this function with the result of the session
+  /** when the session ends call this function with the result of the session */
   endSession(result: Exclude<ResultType, "">) {
     this.session = "end";
     this.result = result;
@@ -172,6 +172,10 @@ export class GameService extends EventEmitter2 {
     }
 
     this.emit(GameEvents.SESSION_END, result);
+  }
+
+  isSessionEnded() {
+    return this.session === "end";
   }
 
   addSessionEndListner(fn: (result: ResultType) => void) {
