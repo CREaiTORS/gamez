@@ -1,6 +1,10 @@
 import { createContext, useContext, useState } from "react";
 
-const Context = createContext({ onRefresh: () => {} });
+const Context = createContext({
+  onRefresh: () => {
+    console.warn("Your component is not child of ComponentRefresh");
+  },
+});
 
 export function ComponentRefresh({ children }: React.PropsWithChildren) {
   const [key, setKey] = useState(1);
