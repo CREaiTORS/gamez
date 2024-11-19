@@ -1,5 +1,6 @@
 import React from "react";
 import { Spinner } from "./Spinner";
+import { twMerge } from "tailwind-merge";
 
 const BtnSizes = {
   xs: "text-xs px-2.5 py-1",
@@ -16,8 +17,7 @@ const ButtonType = {
   none: "",
 };
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
   disabled?: boolean;
   btn?: keyof typeof ButtonType;
@@ -45,10 +45,6 @@ export const Button: React.FC<ButtonProps> = ({
 
   classes.push(ButtonType[btn]);
 
-  if (className) {
-    classes.push(className);
-  }
-
   if (size) {
     classes.push(BtnSizes[size]);
   }
@@ -57,10 +53,14 @@ export const Button: React.FC<ButtonProps> = ({
     classes.push("cursor-not-allowed");
   }
 
+  if (className) {
+    classes.push(className);
+  }
+
   return (
-    <button disabled={disabled} className={classes.join(" ")} {...props}>
+    <button disabled={disabled} className={twMerge(...classes)} {...props}>
       {loading && (
-        <div className="absolute first w-full bg-inherit">
+        <div className="absolute w-full first bg-inherit">
           <Spinner size={22} className="mx-auto" />
         </div>
       )}

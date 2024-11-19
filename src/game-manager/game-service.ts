@@ -252,8 +252,6 @@ export class GameService extends EventEmitter2 {
     console.log(report); // { a: 2, b: 3, c: 4 }
   */
   reportUpdater(fn: (report: any) => any) {
-    return this.on(GameEvents.REPORT_UPDATE, (x) => {
-      Object.assign(x, fn(x));
-    });
+    return this.on(GameEvents.REPORT_UPDATE, (x) => Object.assign(x, fn(x)), { objectify: true }) as Listener;
   }
 }
