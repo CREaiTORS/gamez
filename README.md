@@ -19,6 +19,11 @@ graph TD;
 - Pause: Game Paused because of some event
 - GameOver: Game completed because of success, error or timeout
 
+### Installation
+```
+    npm i https://github.com/CREaiTORS/gamez
+```
+
 ### Sample code
 
 ```typescript
