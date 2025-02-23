@@ -8,10 +8,22 @@ export function getRandomNum(max: number, min = 0) {
   return (Math.round(Math.random() * (max - min)) % (max - min)) + min;
 }
 
+/**
+ *
+ * @param length length of the array
+ * @param max  upper bound
+ * @param min lower bound
+ * @returns array of random numbers between min and max
+ */
+
 export function randomNumbersArr(length: number, max: number, min: number = 0) {
   const nums = [];
 
   for (let i = min; i <= max; i++) nums.push(i);
+
+  while (nums.length < length) {
+    nums.push(...nums);
+  }
 
   nums.sort(() => 0.5 - Math.random());
 

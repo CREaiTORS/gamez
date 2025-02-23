@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { ResultType } from "../types";
 
-export function useResult<T extends string = string>(cb = (_: T) => {}) {
+export function useResult<T extends string = ResultType>(cb = (_: T) => {}) {
   const [result, setResult] = useState("");
 
   return {
