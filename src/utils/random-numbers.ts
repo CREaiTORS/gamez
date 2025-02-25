@@ -9,6 +9,16 @@ export function getRandomNum(max: number, min = 0) {
 }
 
 /**
+ * Randomize the array
+ * @param arr - The input array.
+ * @param copy - create a copy of the array (default: true)
+ * @returns An array of with elements at random positions.
+ */
+export function randomizeArray<T>(array: T[], copy: boolean = true) {
+  return (copy ? [...array] : array).sort(() => Math.random() - 0.5);
+}
+
+/**
  *
  * @param length length of the array
  * @param max  upper bound
@@ -25,7 +35,7 @@ export function randomNumbersArr(length: number, max: number, min: number = 0) {
     nums.push(...nums);
   }
 
-  nums.sort(() => 0.5 - Math.random());
+  randomizeArray(nums, true);
 
   return nums.slice(0, length);
 }
