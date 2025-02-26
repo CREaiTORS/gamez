@@ -40,7 +40,7 @@ export function randomNumbersArr(length: number, max: number, min: number = 0) {
   return nums.slice(0, length);
 }
 
-export function randomElementFromArr(arr: any[]) {
+export function randomElementFromArr<T>(arr: T[]) {
   return arr[Math.round(Math.random() * (arr.length - 1))];
 }
 
