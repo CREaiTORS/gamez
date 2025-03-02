@@ -29,13 +29,13 @@ export class Manager<T extends string = string> {
     return Promise.allSettled(this.getAllGames().map((game) => game.preloadAssets()));
   }
 
-  getResults() {
-    const results: Record<T, any> = {} as any;
+  getReports() {
+    const reports: Record<T, any> = {} as any;
 
     for (const [name, gameService] of Object.entries<GameService>(this.gamesService)) {
-      results[name as T] = gameService.getResults();
+      reports[name as T] = gameService.getReports();
     }
 
-    return results;
+    return reports;
   }
 }
