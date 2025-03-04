@@ -1,6 +1,6 @@
 import { EventEmitter2, Listener, ListenerFn } from "eventemitter2";
-import { ResultType } from "../types";
 import { useSyncExternalStore } from "react";
+import { ResultType } from "../types";
 
 export type GameOverCB = (x: ResultType) => void;
 export type GameListner = Omit<Listener, "emitter"> & { emitter: GameService };
@@ -23,22 +23,24 @@ export enum GameEvents {
 }
 
 export class GameService extends EventEmitter2 {
-  // store the session, either initialized, active, paused or ended.
-  // This is useful for tracking the current state of the game.
-  // For example, you have to stop the game when it's ended, you have to pause the game when it's paused.
-  // initialized is before the start of the game
-  // active is when the game is running
-  // paused is when the game is paused for some reason
-  // end is when the game is finished this could be because of success, error, timeout
+  /** Store the session, either initialized, active, paused or ended.
+   * This is useful for tracking the current state of the game.
+   * For example, you have to stop the game when it's ended, you have to pause the game when it's paused.
+   * initialized is before the start of the game
+   * active is when the game is running
+   * paused is when the game is paused for some reason
+   * end is when the game is finished this could be because of success, error, timeout */
   private session: "initialized" | "active" | "paused" | "end";
-  // store the state of the session
+  /** store the state of the session */
   private state: GameState;
-  // stores the report of previous sessions
+  /** stores the report of previous sessions */
   private reports: object[];
-  // current level index in levels array
+  /** current level index in levels array */
   private currLevel: number;
-  // store the result of the session
+  /** store the result of the session */
   private result: ResultType;
+  /** Store arbitrary values */
+  public data: any;
 
   assetsPreloaded: boolean;
 
@@ -92,8 +94,8 @@ export class GameService extends EventEmitter2 {
     return this.currLevel >= this.levels.length;
   }
 
-  getCurrLevelDetails() {
-    return this.levels[this.currLevel];
+  getCurrLevelDetails<T>() {
+    return this.levels[this.currLevel] as T;
   }
 
   // move to the next level
