@@ -103,6 +103,10 @@ export class GameService extends EventEmitter2 {
     this.currLevel = this.currLevel + 1;
   }
 
+  setCurrLevel(level: number) {
+    this.currLevel = level;
+  }
+
   /** get state of the session, state is just internal values like score, remaining lives etc */
   getState() {
     return this.state;
