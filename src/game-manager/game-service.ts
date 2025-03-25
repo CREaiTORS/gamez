@@ -40,9 +40,10 @@ export class GameService extends EventEmitter2 {
   /** store the result of the session */
   private result: ResultType;
   /** Store arbitrary values */
-  public data: any;
+  public data: Record<string, any>;
 
   assetsPreloaded: boolean;
+  assetsBasePath: string;
 
   debug(...x: any[]) {
     console.info(`[${this.name}]:`, ...x);
@@ -63,7 +64,9 @@ export class GameService extends EventEmitter2 {
     // session
     this.result = "";
     this.state = {};
+    this.data = {};
     this.session = "initialized";
+    this.assetsBasePath = "";
   }
   /** initial value of your state, like settings remaining lives to available lives, or score to zero. */
   initState(state: GameState) {
@@ -76,10 +79,10 @@ export class GameService extends EventEmitter2 {
 
     await Promise.allSettled(
       Object.entries(this.assets).map(([name, src]) =>
-        fetch(src)
-          .then((res) => res.blob())
-          .then((x) => (this.assets[name] = URL.createObjectURL(x)))
-          .catch(console.warn)
+        fetch(this.assetsBasePath + src)
+          .then((res) => (res.ok ? res.blob() : new Promise((_, reject) => reject(`Failed to load ${name}`))))
+          .then((x) => (this.assets[name] = URL.createObjectURL(x as Blob)))
+          .catch(this.warn.bind(this))
       )
     );
     this.assetsPreloaded = true;
@@ -222,7 +225,7 @@ export class GameService extends EventEmitter2 {
   }
 
   /**   
-  when session ends you need to collect report.
+  When session ends you need to collect report.
   report is data collected from the session.
   collectReport will call reportUpdater and collect report, but it will not save report, you have to do it yourself
 
@@ -237,7 +240,7 @@ export class GameService extends EventEmitter2 {
   collectReport(initialReport = {}) {
     if (this.session === "end") {
       // initialReport will be updated by reportUpdater
-      this.emitAsync(GameEvents.REPORT_UPDATE, initialReport);
+      this.emit(GameEvents.REPORT_UPDATE, initialReport);
     } else {
       this.warn("Cannot collect report, session is still active");
     }
