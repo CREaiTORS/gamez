@@ -6,4 +6,5 @@ export * from "./Editor";
 export * from "./ErrorBoundary";
 export * from "./GameServiceWrapper";
 export * from "./LivesTracker";
+export * from "./ResultOverlay";
 export * from "./Spinner";
