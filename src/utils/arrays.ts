@@ -40,7 +40,5 @@ export function getRandomNumbersArray(length: number, max: number, min: number =
     nums.push(...nums);
   }
 
-  shuffleArray(nums, true);
-
-  return nums.slice(0, length);
+  return shuffleArray(nums).slice(0, length);
 }
