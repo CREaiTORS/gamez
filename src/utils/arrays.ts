@@ -26,7 +26,7 @@ export function getRandomElementFromArray<T>(arr: T[]) {
 /**
  *
  * @param length length of the array
- * @param max  upper bound
+ * @param max  upper bound, excluding this value
  * @param min lower bound
  * @returns array of random numbers between min and max
  */
@@ -34,7 +34,7 @@ export function getRandomElementFromArray<T>(arr: T[]) {
 export function getRandomNumbersArray(length: number, max: number, min: number = 0) {
   const nums = [];
 
-  for (let i = min; i <= max; i++) nums.push(i);
+  for (let i = min; i < max; i++) nums.push(i);
 
   while (nums.length < length) {
     nums.push(...nums);
