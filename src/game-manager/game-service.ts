@@ -41,8 +41,8 @@ export class GameService extends EventEmitter2 {
   private result: ResultType;
   /** Store arbitrary values */
   public data: Record<string, any>;
+  public assets: Record<string, string>;
 
-  assetsPreloaded: boolean;
   assetsBasePath: string;
 
   debug(...x: any[]) {
@@ -52,14 +52,13 @@ export class GameService extends EventEmitter2 {
     console.warn(`[${this.name}]:`, ...x);
   }
 
-  constructor(public name: string, public levels: any[], public assets: Record<string, string> = {}) {
+  constructor(public name: string, public levels: any[], assets: Record<string, string> = {}) {
     super({ wildcard: true, verboseMemoryLeak: true, newListener: true, removeListener: true, delimiter: "." });
 
     // for entire game
     this.name = name;
     this.reports = [];
     this.currLevel = 0;
-    this.assetsPreloaded = false;
 
     // session
     this.result = "";
@@ -67,25 +66,48 @@ export class GameService extends EventEmitter2 {
     this.data = {};
     this.session = "initialized";
     this.assetsBasePath = "";
+    this.assets = new Proxy(assets, {
+      get: (target, prop: string) => {
+        if (!target[prop].startsWith("blob:")) {
+          this.warn(`Asset ${prop}:${target[prop]} is not preloaded`);
+        }
+
+        return target[prop];
+      },
+      set: (target, prop: string, newValue) => {
+        if (!newValue.startsWith("blob:")) {
+          this.warn(`Can't update asset ${prop} with ${newValue}`);
+          return false;
+        } else {
+          target[prop] = newValue;
+          return true;
+        }
+      },
+      getPrototypeOf() {
+        return assets;
+      },
+    });
   }
   /** initial value of your state, like settings remaining lives to available lives, or score to zero. */
   initState(state: GameState) {
     this.state = state;
     this.emit(GameEvents.STATE_INIT, this.state);
   }
-  /** load your assets like img, video, sound, etc */
-  async preloadAssets() {
-    if (this.assetsPreloaded) return Promise.resolve();
 
+  /**
+   * Load your assets like img, video, sound, etc.
+   */
+  async preloadAssets(partialAssets: Record<string, string> = Object.getPrototypeOf(this.assets)) {
     await Promise.allSettled(
-      Object.entries(this.assets).map(([name, src]) =>
-        fetch(this.assetsBasePath + src)
-          .then((res) => (res.ok ? res.blob() : new Promise((_, reject) => reject(`Failed to load ${name}`))))
-          .then((x) => (this.assets[name] = URL.createObjectURL(x as Blob)))
-          .catch(this.warn.bind(this))
-      )
+      Object.entries(partialAssets)
+        .filter(([_name, src]) => !src.startsWith("blob:"))
+        .map(([name, src]) =>
+          fetch(this.assetsBasePath + src)
+            .then((res) => (res.ok ? res.blob() : new Promise((_, reject) => reject(`Failed to load ${name}`))))
+            .then((x) => (this.assets[name] = URL.createObjectURL(x as Blob)))
+            .catch(this.warn.bind(this))
+        )
     );
-    this.assetsPreloaded = true;
   }
 
   getCurrLevel() {
