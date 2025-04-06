@@ -68,7 +68,9 @@ export class GameService extends EventEmitter2 {
     this.assetsBasePath = "";
     this.assets = new Proxy(assets, {
       get: (target, prop: string) => {
-        if (!target[prop].startsWith("blob:")) {
+        if (!target[prop]) {
+          this.warn(`Missing asset ${prop}:${target[prop]}`);
+        } else if (!target[prop].startsWith("blob:")) {
           this.warn(`Asset ${prop}:${target[prop]} is not preloaded`);
         }
 
