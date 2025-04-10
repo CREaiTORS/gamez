@@ -16,12 +16,3 @@ export function formatTime(seconds: number): string {
 
   return `${formattedMinutes}:${formattedSeconds}`;
 }
-
-/**
- * Calculates the time per order based on the level of the order.
- * @param level - The level of the order.
- * @returns The time per order in milliseconds.
- */
-export function getTimePerOrder(level: number) {
-  return (12 - 2 * level) * 1000; // Converted to milliseconds
-}
