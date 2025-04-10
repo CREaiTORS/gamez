@@ -9,19 +9,19 @@ const config = {
   // automock: false,
 
   // Stop running tests after `n` failures
-  // bail: 0,
+  bail: 5,
 
   // The directory where Jest should store its cached dependency information
-  // cacheDirectory: "C:\\Users\\ss497254\\AppData\\Local\\Temp\\jest",
+  // cacheDirectory: "",
 
   // Automatically clear mock calls, instances, contexts and results before every test
   clearMocks: true,
 
   // Indicates whether the coverage information should be collected while executing the test
-  // collectCoverage: false,
+  collectCoverage: true,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
-  // collectCoverageFrom: undefined,
+  collectCoverageFrom: ["/src/**/*.{js,jsx,ts,tsx}"],
 
   // The directory where Jest should output its coverage files
   // coverageDirectory: undefined,
