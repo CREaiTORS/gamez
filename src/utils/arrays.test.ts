@@ -1,4 +1,11 @@
-import { getRandomElementFromArray, getRandomNElementsFromArray, getRandomNumbersArray, shuffleArray } from "./arrays";
+import {
+  compareArrays,
+  getRandomElementFromArray,
+  getRandomNElementsFromArray,
+  getRandomNumbersArray,
+  rotateArray,
+  shuffleArray,
+} from "./arrays";
 
 describe("getRandomElementFromArray", () => {
   it("should return a random element from the array", () => {
@@ -203,5 +210,97 @@ describe("getRandomNumbersArray", () => {
       expect(count).toBeGreaterThan(expectedFrequency * (1 - tolerance));
       expect(count).toBeLessThan(expectedFrequency * (1 + tolerance));
     }
+  });
+
+  it("should handle large arrays with repeating numbers efficiently", () => {
+    const result = getRandomNumbersArray(100, 50);
+    expect(result).toHaveLength(100);
+    result.forEach((num) => {
+      expect(num).toBeGreaterThanOrEqual(0);
+      expect(num).toBeLessThan(50);
+    });
+  });
+});
+
+describe("compareArrays", () => {
+  it("should return true for identical arrays", () => {
+    const a = [1, 2, 3];
+    const b = [1, 2, 3];
+    expect(compareArrays(a, b)).toBe(true);
+  });
+
+  it("should return false for arrays with different lengths", () => {
+    const a = [1, 2, 3];
+    const b = [1, 2];
+    expect(compareArrays(a, b)).toBe(false);
+  });
+
+  it("should return false for arrays with same length but different elements", () => {
+    const a = [1, 2, 3];
+    const b = [1, 2, 4];
+    expect(compareArrays(a, b)).toBe(false);
+  });
+
+  it("should handle empty arrays", () => {
+    const a: any[] = [];
+    const b: any[] = [];
+    expect(compareArrays(a, b)).toBe(true);
+  });
+
+  it("should handle arrays with mixed types", () => {
+    const a = [1, "two", { three: 3 }];
+    const b = [1, "two", { three: 3 }];
+    expect(compareArrays(a, b)).toBe(false); // Objects are compared by reference
+  });
+
+  it("should handle arrays with nested arrays", () => {
+    const a = [1, [2, 3]];
+    const b = [1, [2, 3]];
+    expect(compareArrays(a, b)).toBe(false); // Arrays are compared by reference
+  });
+});
+
+describe("rotateArray", () => {
+  it("should correctly rotate array by positive k", () => {
+    const input = [1, 2, 3, 4];
+    const result = rotateArray(input, 2);
+    expect(result).toEqual([3, 4, 1, 2]);
+  });
+
+  it("should correctly rotate array by k=1", () => {
+    const input = [1, 2, 3];
+    const result = rotateArray(input, 1);
+    expect(result).toEqual([3, 1, 2]);
+  });
+
+  it("should handle k greater than array length", () => {
+    const input = [1, 2, 3, 4];
+    const result = rotateArray(input, 6);
+    expect(result).toEqual([3, 4, 1, 2]); // Same as rotating by 2
+  });
+
+  it("should handle k=0 (no rotation)", () => {
+    const input = [1, 2, 3, 4];
+    const result = rotateArray(input, 0);
+    expect(result).toEqual([1, 2, 3, 4]);
+  });
+
+  it("should handle empty arrays", () => {
+    const input: any[] = [];
+    const result = rotateArray(input, 3);
+    expect(result).toEqual([]);
+  });
+
+  it("should handle negative k values", () => {
+    const input = [1, 2, 3, 4];
+    const result = rotateArray(input, -1);
+    expect(result).toEqual([2, 3, 4, 1]);
+  });
+
+  it("should not modify the original array", () => {
+    const input = [1, 2, 3, 4];
+    const originalInput = [...input];
+    rotateArray(input, 2);
+    expect(input).toEqual(originalInput);
   });
 });
