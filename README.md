@@ -6,80 +6,106 @@ GameZ is a toolkit for building games in React. It provides a collection of reus
 
 ```mermaid
 graph TD;
-    Initialized-->Active;
-    Active-->Pause;
-    Pause-->Active;
-    Pause-->GameOver;
-    Active-->GameOver;
-    GameOver-->Initialized;
+  Initialized-->Active;
+  Active-->Pause;
+  Pause-->Active;
+  Pause-->GameOver;
+  Active-->GameOver;
+  GameOver-->Initialized;
 ```
 
-- Initialized: Waiting to be started, assets loaded,
-- Active: Game started
-- Pause: Game Paused because of some event
-- GameOver: Game completed because of success, error or timeout
+- Initialized: Waiting to be started, assets loaded
+- Active: Game running
+- Pause: Game paused due to user interaction or system events
+- GameOver: Game completed (success, failure, or timeout)
 
-### Installation
-```
-    npm i https://github.com/CREaiTORS/gamez
+## Installation
+
+```bash
+npm install https://github.com/CREaiTORS/gamez.git
 ```
 
-### Sample code
+## Quick Start
 
 ```typescript
-import { GameService } from "gamez";
+import { GameService } from "@creaitors/gamez";
 
+// Define your game levels
 const levels = [
-  { lives: 4, cards: 4, animals: 5 },
-  { lives: 5, cards: 7, animals: 10 },
-  { lives: 6, cards: 9, animals: 15 },
+  { lives: 3, timeLimit: 60, difficulty: "easy" },
+  { lives: 2, timeLimit: 45, difficulty: "medium" },
+  { lives: 1, timeLimit: 30, difficulty: "hard" },
 ];
 
+// Define assets to preload
 const assets = {
-  bg: "/assets/bg.png",
-  animals: "/assets/animals.mp4",
-  cat: "/assets/cat.png",
-  card: "/assets/card.png",
+  backgroundImage: "/assets/background.png",
+  playerSprite: "/assets/player.png",
+  soundEffects: {
+    success: "/assets/sounds/success.mp3",
+    failure: "/assets/sounds/failure.mp3",
+  },
 };
 
-const gs = new GameService("my-game-name", levels, assets);
-
-// you should wait for the assets to be loaded before starting
-await gs.preloadAssets();
-
-// using assets is simple
-<img src={gs.assets.bg} />;
-<video src={src.assets.animals} />;
-
-// start the game session
-gs.startSession();
-// do your work
-
-// if you need to pause the game
-gs.pauseSession();
-// to resume
-gs.resumeSession();
-
-// do your work
-// call endSession to end the game session
-// resultStatus = "success" | "error" | "timeout"
-gs.endSession(resultStatus);
-// after end session any updates will be rejected
-
-// you can attach listeners for session end, listener will receive resultStatus as argument
-gs.onSessionEnd((resultStatus) => {
-  // do you work
-
-  // you should call collectResult after en
-  const result = await gs.collectResult();
-  gs.resetSession();
-
-  gs.nextLevel();
+// Initialize game service
+const gs = new gs({
+  gameId: "my-awesome-game",
+  levels,
+  assets,
 });
 
-// once done with
+// Usage example
+async function startGame() {
+  // Preload all assets before starting
+  await gs.preloadAssets();
 
-// to get the result you need to first update result with your values
-// you will have to add this function it will be called when collectResult is executed
-gs.updateResult((oldResult) => ({ ...oldResult, somevalue: value }));
+  // Start game session
+  gs.startSession();
+
+  // Access assets in your components
+  const Background = () => <img src={gs.assets.backgroundImage} />;
+
+  // Game control methods
+  function pauseGame() {
+    gs.pauseSession();
+  }
+
+  function resumeGame() {
+    gs.resumeSession();
+  }
+
+  // Handle game completion
+  gs.onSessionEnd((status) => {
+    console.log(`Game ended with status: ${status}`);
+
+    // Collect results for analytics or score tracking
+    const results = gs.collectResults();
+
+    // Move to next level
+    if (status === "success") {
+      gs.nextLevel();
+    }
+  });
+
+  // Update game results
+  gs.reportUpdater((prevResults) => ({
+    ...prevResults,
+    score: 1250,
+    timeElapsed: 45,
+    attempts: 3,
+  }));
+
+  // End game with a status
+  function completeLevel(success = true) {
+    gs.endSession(success ? "success" : "failure");
+  }
+}
 ```
+
+## Advanced Features
+
+- **Level Management**: Easily define and navigate between game levels
+- **State Management**: Track game state with built-in state management
+- **Asset Preloading**: Ensure all assets are ready before gameplay begins
+- **Event System**: Subscribe to game lifecycle events
+- **Results Tracking**: Collect and process game results for analytics
