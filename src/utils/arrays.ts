@@ -36,7 +36,7 @@ export function getRandomNumbersArray(length: number, max: number, min: number =
 
   for (let i = min; i < max; i++) nums.push(i);
 
-  while (nums.length < length) {
+  while (nums.length && nums.length < length) {
     nums.push(...nums);
   }
 
