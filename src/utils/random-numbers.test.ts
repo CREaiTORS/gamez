@@ -1,3 +1,4 @@
+import { expect } from "@jest/globals";
 import { getRandomNumbersArray } from "./arrays";
 import { getRandomBoolean, getRandomFloat, getRandomNum, getRandomNumbers } from "./random-numbers";
 
@@ -20,6 +21,22 @@ describe("random-numbers utility functions", () => {
       const result = getRandomNum(max);
       expect(result).toBeGreaterThanOrEqual(0);
       expect(result).toBeLessThan(max);
+    });
+
+    it("should get random number in equal proportion", () => {
+      const max = 100;
+      const repeat = 1_000_000;
+      const count = new Map<number, number>();
+      for (let i = 0; i < repeat; i++) {
+        const random = getRandomNum(max);
+        count.set(random, (count.get(random) ?? 0) + 1);
+      }
+
+      const expectedCount = repeat / max;
+      for (let i = 0; i < max; i++) {
+        // Check that the count is within 10% of the expected count.
+        expect(count.get(i)).toBeWithinRange(expectedCount * 0.9, expectedCount * 1.1);
+      }
     });
   });
 
