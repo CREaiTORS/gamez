@@ -22,36 +22,81 @@ export enum GameEvents {
   RESULT_TIMEOUT = "result.timeout",
 }
 
+/**
+ * GameService class for managing game session state and lifecycle.
+ *
+ * This class extends EventEmitter2 to provide event-based communication
+ * throughout the game lifecycle. It handles:
+ * - Game session management (active, paused, ended states)
+ * - Level progression
+ * - State management and updates
+ * - Asset preloading and management
+ * - Result tracking
+ * - Reporting functionality
+ *
+ * @extends EventEmitter2
+ */
+/**
+ * GameService class for managing game sessions, states, and events.
+ * Extends EventEmitter2 to provide event handling capabilities.
+ */
 export class GameService extends EventEmitter2 {
-  /** Store the session, either initialized, active, paused or ended.
+  /**
+   * Store the session state: initialized, active, paused or ended.
    * This is useful for tracking the current state of the game.
-   * For example, you have to stop the game when it's ended, you have to pause the game when it's paused.
-   * initialized is before the start of the game
-   * active is when the game is running
-   * paused is when the game is paused for some reason
-   * end is when the game is finished this could be because of success, error, timeout */
+   * - initialized: before the start of the game
+   * - active: when the game is running
+   * - paused: when the game is paused for some reason
+   * - end: when the game is finished (success, error, timeout)
+   */
   private session: "initialized" | "active" | "paused" | "end";
-  /** store the state of the session */
+
+  /** Store the state of the session */
   private state: GameState;
-  /** stores the report of previous sessions */
+
+  /** Stores the report of previous sessions */
   private reports: object[];
-  /** current level index in levels array */
+
+  /** Current level index in levels array */
   private currLevel: number;
-  /** store the result of the session */
+
+  /** Store the result of the session */
   private result: ResultType;
+
   /** Store arbitrary values */
   public data: Record<string, any>;
+
+  /**
+   * Proxy object for game assets
+   * Provides warnings for missing/unloaded assets
+   */
   public assets: Record<string, string>;
 
+  /** Base path for asset loading */
   assetsBasePath: string;
 
+  /**
+   * Log debug information to console
+   * @param x - Values to log
+   */
   debug(...x: any[]) {
     console.info(`[${this.name}]:`, ...x);
   }
+
+  /**
+   * Log warning information to console
+   * @param x - Values to log
+   */
   warn(...x: any[]) {
     console.warn(`[${this.name}]:`, ...x);
   }
 
+  /**
+   * Create a new GameService instance
+   * @param name - Name of the game service
+   * @param levels - Array of game levels
+   * @param assets - Record of asset names to paths
+   */
   constructor(public name: string, public levels: any[], assets: Record<string, string> = {}) {
     super({ wildcard: true, verboseMemoryLeak: true, newListener: true, removeListener: true, delimiter: "." });
 
@@ -90,14 +135,22 @@ export class GameService extends EventEmitter2 {
       },
     });
   }
-  /** initial value of your state, like settings remaining lives to available lives, or score to zero. */
+
+  /**
+   * Initialize the game state
+   * Sets initial values like remaining lives, score, etc.
+   * @param state - Initial game state
+   */
   initState(state: GameState) {
     this.state = state;
     this.emit(GameEvents.STATE_INIT, this.state);
   }
 
   /**
-   * Load your assets like img, video, sound, etc.
+   * Preload assets like images, videos, sounds
+   * Fetches resources and creates blob URLs
+   * @param partialAssets - Assets to load, defaults to all assets
+   * @returns Promise that resolves when loading attempts complete
    */
   async preloadAssets(partialAssets: Record<string, string> = Object.getPrototypeOf(this.assets)) {
     await Promise.allSettled(
@@ -112,39 +165,67 @@ export class GameService extends EventEmitter2 {
     );
   }
 
+  /**
+   * Get the current level index
+   * @returns Current level index
+   */
   getCurrLevel() {
     return this.currLevel;
   }
 
-  /** game is complete when no more levels are left */
+  /**
+   * Check if all levels are completed
+   * @returns True if no more levels remain
+   */
   isGameComplete() {
     return this.currLevel >= this.levels.length;
   }
 
+  /**
+   * Get the details of the current level
+   * @returns Current level details cast to type T
+   * @template T - Type of level details
+   */
   getCurrLevelDetails<T>() {
     return this.levels[this.currLevel] as T;
   }
 
-  // move to the next level
+  /**
+   * Advance to the next level
+   */
   nextLevel() {
     this.currLevel = this.currLevel + 1;
   }
 
+  /**
+   * Set the current level index
+   * @param level - Level index to set
+   */
   setCurrLevel(level: number) {
     this.currLevel = level;
   }
 
-  /** get state of the session, state is just internal values like score, remaining lives etc */
+  /**
+   * Get the current game state
+   * @returns Current game state
+   */
   getState() {
     return this.state;
   }
 
+  /**
+   * Update the game state with new values
+   * @param state - Partial state to merge with current state
+   */
   updateState(state: Partial<GameState>) {
     this.state = { ...this.state, ...state };
     this.emit(GameEvents.STATE_UPDATE, this.state);
   }
 
-  /** use this when you want to update the component when the state changes */
+  /**
+   * React hook to subscribe to game state changes
+   * @returns Current game state
+   */
   useGameState() {
     return useSyncExternalStore((cb) => {
       const listener = this.addStateListener(cb);
@@ -152,19 +233,36 @@ export class GameService extends EventEmitter2 {
     }, this.getState.bind(this));
   }
 
-  /** fn will be called when the state changes */
+  /**
+   * Add a listener for state change events
+   * @param fn - Callback function for state changes
+   * @returns Listener object with off() method
+   */
   addStateListener(fn: ListenerFn) {
     return this.on(GameEvents.STATE, fn, { objectify: true }) as Listener;
   }
 
+  /**
+   * Get the current session state
+   * @returns Session state: "initialized", "active", "paused", or "end"
+   */
   getSession() {
     return this.session;
   }
 
+  /**
+   * Add a listener for session change events
+   * @param fn - Callback function for session changes
+   * @returns Listener object with off() method
+   */
   addSessionListener(fn: ListenerFn) {
     return this.on(GameEvents.SESSION, fn, { objectify: true }) as Listener;
   }
 
+  /**
+   * React hook to subscribe to session state changes
+   * @returns Current session state
+   */
   useSession() {
     return useSyncExternalStore((cb) => {
       const listener = this.addSessionListener(cb);
@@ -172,6 +270,10 @@ export class GameService extends EventEmitter2 {
     }, this.getSession.bind(this));
   }
 
+  /**
+   * Start the game session
+   * Changes session state to "active"
+   */
   startSession() {
     if (this.session !== "initialized") {
       return this.warn("reset session before starting");
@@ -181,17 +283,28 @@ export class GameService extends EventEmitter2 {
     this.emit(GameEvents.SESSION_ACTIVE);
   }
 
+  /**
+   * Pause the game session
+   * Changes session state to "paused"
+   */
   pauseSession() {
     this.session = "paused";
     this.emit(GameEvents.SESSION_PAUSE);
   }
 
+  /**
+   * Resume a paused game session
+   * Changes session state to "active"
+   */
   resumeSession() {
     this.session = "active";
     this.emit(GameEvents.SESSION_ACTIVE);
   }
 
-  /** when the session ends call this function with the result of the session */
+  /**
+   * End the current session with a result
+   * @param result - Outcome of the session: "error", "success", or "timeout"
+   */
   endSession(result: Exclude<ResultType, "">) {
     this.session = "end";
     this.result = result;
@@ -207,15 +320,26 @@ export class GameService extends EventEmitter2 {
     this.emit(GameEvents.SESSION_END, result);
   }
 
+  /**
+   * Check if the current session has ended
+   * @returns True if session state is "end"
+   */
   isSessionEnded() {
     return this.session === "end";
   }
 
+  /**
+   * Add a listener for session end events
+   * @param fn - Callback function for session end
+   */
   addSessionEndListner(fn: (result: ResultType) => void) {
     this.on(GameEvents.SESSION_END, fn, { objectify: true }) as Listener;
   }
 
-  // to be called before moving to the next session
+  /**
+   * Reset the session to initial state
+   * Removes all listeners and resets state and result
+   */
   resetSession() {
     this.removeAllListeners();
     this.session = "initialized";
@@ -223,14 +347,26 @@ export class GameService extends EventEmitter2 {
     this.result = "";
   }
 
+  /**
+   * Get the result of the current session
+   * @returns Result of the session
+   */
   getResult() {
     return this.result;
   }
-
+  /**
+   * Add a listener for result change events
+   * @param fn - Callback function for result changes
+   * @returns Listener object with off() method
+   */
   addResultListener(fn: ListenerFn) {
     return this.on(GameEvents.RESULT, fn, { objectify: true }) as Listener;
   }
 
+  /**
+   * React hook to subscribe to result changes
+   * @returns Current result
+   */
   useResult() {
     return useSyncExternalStore((cb) => {
       const listener = this.addResultListener(cb);
@@ -238,29 +374,34 @@ export class GameService extends EventEmitter2 {
     }, this.getResult.bind(this));
   }
 
-  // all your stored reports
+  /**
+   * Get all stored session reports
+   * @returns Array of session reports
+   */
   getReports() {
     return this.reports;
   }
 
-  /** based on session result you may choose to save */
+  /**
+   * Save a report to the reports history
+   * @param report - Report data to save
+   */
   saveReport(report: any) {
     this.reports.push(report);
   }
 
-  /**   
-  When session ends you need to collect report.
-  report is data collected from the session.
-  collectReport will call reportUpdater and collect report, but it will not save report, you have to do it yourself
-
-  @example
-    gs.reportUpdater(() => ({ a: 1 }));
-    gs.reportUpdater(() => ({ a: 2 }));
-    gs.reportUpdater((x) => ({ b: 3, c: x.a + 2 }));
-  
-    const report = gs.collectReport();
-    console.log(report); // { a: 2, b: 3, c: 4 }
-  */
+  /**
+   * Collect a report from the session
+   * Triggers report update event to collect data from updaters
+   * @param initialReport - Starting report object
+   * @returns Collected report with all updates applied
+   * @example
+   * gs.reportUpdater(() => ({ a: 1 }));
+   * gs.reportUpdater(() => ({ a: 2 }));
+   * gs.reportUpdater((x) => ({ b: 3, c: x.a + 2 }));
+   * const report = gs.collectReport({ d: 5 });
+   * console.log(report); // { a: 2, b: 3, c: 4, d: 5 }
+   */
   collectReport(initialReport = {}) {
     if (this.session === "end") {
       // initialReport will be updated by reportUpdater
@@ -273,17 +414,16 @@ export class GameService extends EventEmitter2 {
   }
 
   /**
-  this function is used to update the report when collectReport is called
-  this function accepts a updater function which updates the report
-  
-  @example
-    gs.reportUpdater(() => ({ a: 1 }));
-    gs.reportUpdater(() => ({ a: 2 }));
-    gs.reportUpdater((x) => ({ b: 3, c: x.a + 2 }));
-  
-    const report = gs.collectReport();
-    console.log(report); // { a: 2, b: 3, c: 4 }
-  */
+   * Register a function to update the report when collectReport is called
+   * @param fn - Function that receives the current report and returns updates
+   * @returns Listener object with off() method
+   * @example
+   * gs.reportUpdater(() => ({ a: 1 }));
+   * gs.reportUpdater(() => ({ a: 2 }));
+   * gs.reportUpdater((x) => ({ b: 3, c: x.a + 2 }));
+   * const report = gs.collectReport();
+   * console.log(report); // { a: 2, b: 3, c: 4 }
+   */
   reportUpdater(fn: (report: any) => any) {
     return this.on(GameEvents.REPORT_UPDATE, (x) => Object.assign(x, fn(x)), { objectify: true }) as Listener;
   }
