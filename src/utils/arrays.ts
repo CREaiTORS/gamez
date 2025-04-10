@@ -31,6 +31,22 @@ export function getRandomElementFromArray<T>(arr: T[]) {
  * @returns array of random numbers between min and max
  */
 
+/**
+ * Generates an array of random numbers with a specified length.
+
+ * @param length - The desired length of the resulting array
+ * @param max - The exclusive upper limit for the generated numbers
+ * @param min - The inclusive lower limit for the generated numbers (defaults to 0)
+ * @returns An array of shuffled numbers with the specified length
+ *
+ * @example
+ * // Returns an array of 5 random numbers between 0 and 9
+ * getRandomNumbersArray(5, 10);
+ *
+ * @example
+ * // Returns an array of 8 random numbers between 3 and 9
+ * getRandomNumbersArray(8, 10, 3);
+ */
 export function getRandomNumbersArray(length: number, max: number, min: number = 0) {
   const nums = [];
 
@@ -41,4 +57,45 @@ export function getRandomNumbersArray(length: number, max: number, min: number =
   }
 
   return shuffleArray(nums).slice(0, length);
+}
+
+/**
+ * Compare two arrays for equality
+ * @param a array a to compare
+ * @param b array b to compare
+ * @returns boolean
+ */
+export function compareArrays(a: any[], b: any[]) {
+  if (a.length !== b.length) return false;
+
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Rotates an array by k positions.
+ *
+ * @param array - The input array to be rotated
+ * @param k - The number of positions to rotate the array by
+ * @returns A new array with elements rotated by k positions
+ *
+ * @example
+ * rotateArray([1, 2, 3, 4], 2);
+ * // Returns [3, 4, 1, 2]
+ *
+ * @example
+ * rotateArray([1, 2, 3], 1);
+ * // Returns [2, 3, 1]
+ */
+export function rotateArray(array: any[], k: number) {
+  const newArray = [];
+
+  for (let i = 0; i < array.length; i++) {
+    newArray[(i + k) % array.length] = array[i];
+  }
+
+  return newArray;
 }
