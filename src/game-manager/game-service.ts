@@ -55,16 +55,16 @@ export class GameService extends EventEmitter2 {
   constructor(public name: string, public levels: any[], assets: Record<string, string> = {}) {
     super({ wildcard: true, verboseMemoryLeak: true, newListener: true, removeListener: true, delimiter: "." });
 
-    // for entire game
-    this.name = name;
-    this.reports = [];
-    this.currLevel = 0;
-
     // session
     this.result = "";
     this.state = {};
     this.data = {};
     this.session = "initialized";
+
+    // for entire game
+    this.name = name;
+    this.reports = [];
+    this.currLevel = 0;
     this.assetsBasePath = "";
     this.assets = new Proxy(assets, {
       get: (target, prop: string) => {
