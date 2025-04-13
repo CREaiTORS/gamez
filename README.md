@@ -48,11 +48,11 @@ const assets = {
 };
 
 // Initialize game service
-const gs = new gs({
-  gameId: "my-awesome-game",
+const gs = new gs(
+  "my-awesome-game",
   levels,
   assets,
-});
+);
 
 // Usage example
 async function startGame() {
@@ -88,8 +88,7 @@ async function startGame() {
   });
 
   // Update game results
-  gs.reportUpdater((prevResults) => ({
-    ...prevResults,
+  gs.reportUpdater(() => ({
     score: 1250,
     timeElapsed: 45,
     attempts: 3,
