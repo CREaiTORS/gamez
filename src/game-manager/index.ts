@@ -1,2 +1,2 @@
+export * from "./game-manager";
 export * from "./game-service";
-export * from "./manager";

@@ -1,6 +1,6 @@
 import { GameService } from "./game-service";
 
-export class Manager<T extends string = string> {
+export class GameManager<T extends string = string> {
   gamesService: Record<T, GameService>;
 
   constructor() {
@@ -17,8 +17,8 @@ export class Manager<T extends string = string> {
     return Object.values(this.gamesService) as GameService[];
   }
 
-  addGame(name: T, game: GameService) {
-    this.gamesService[name] = game;
+  addGame(game: GameService<T>) {
+    this.gamesService[game.name] = game;
   }
 
   removeGameService(name: T) {
