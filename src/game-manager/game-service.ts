@@ -40,7 +40,7 @@ export enum GameEvents {
  * GameService class for managing game sessions, states, and events.
  * Extends EventEmitter2 to provide event handling capabilities.
  */
-export class GameService extends EventEmitter2 {
+export class GameService<T extends string = string> extends EventEmitter2 {
   /**
    * Store the session state: initialized, active, paused or ended.
    * This is useful for tracking the current state of the game.
@@ -97,7 +97,7 @@ export class GameService extends EventEmitter2 {
    * @param levels - Array of game levels
    * @param assets - Record of asset names to paths
    */
-  constructor(public name: string, public levels: any[], assets: Record<string, string> = {}) {
+  constructor(public name: T, public levels: any[], assets: Record<string, string> = {}) {
     super({ wildcard: true, verboseMemoryLeak: true, newListener: true, removeListener: true, delimiter: "." });
 
     // session
