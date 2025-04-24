@@ -21,7 +21,7 @@ export function sleep(time: number) {
  * @returns
  */
 export function diffTime(startTime: number, delay = 0) {
-  return (new Date().getTime() - startTime - delay) / 1000;
+  return (Date.now() - startTime - delay) / 1000;
 }
 
 export function vibrate(duration = 100) {

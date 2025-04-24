@@ -1,6 +1,7 @@
 import { EventEmitter2, Listener, ListenerFn } from "eventemitter2";
 import { useSyncExternalStore } from "react";
 import { ResultType } from "../types";
+import { diffTime } from "../utils";
 
 export type GameOverCB = (x: ResultType) => void;
 export type GameListner = Omit<Listener, "emitter"> & { emitter: GameService };
@@ -63,6 +64,12 @@ export class GameService<T extends string = string> extends EventEmitter2 {
   /** Store the result of the session */
   private result: ResultType;
 
+  /** Store the events of the session */
+  private events: any[];
+
+  /** Store the start time of the session */
+  private sessionStartTime: number;
+
   /** Store arbitrary values */
   public data: Record<string, any>;
 
@@ -109,6 +116,8 @@ export class GameService<T extends string = string> extends EventEmitter2 {
     // for entire game
     this.name = name;
     this.reports = [];
+    this.events = [];
+    this.sessionStartTime = 0;
     this.currLevel = 0;
     this.assetsBasePath = "";
     this.assets = new Proxy(assets, {
@@ -280,6 +289,7 @@ export class GameService<T extends string = string> extends EventEmitter2 {
     }
 
     this.session = "active";
+    this.sessionStartTime = Date.now();
     this.emit(GameEvents.SESSION_ACTIVE);
   }
 
@@ -343,7 +353,9 @@ export class GameService<T extends string = string> extends EventEmitter2 {
   resetSession() {
     this.removeAllListeners();
     this.session = "initialized";
+    this.sessionStartTime = 0;
     this.state = {};
+    this.events = [];
     this.result = "";
   }
 
@@ -426,5 +438,23 @@ export class GameService<T extends string = string> extends EventEmitter2 {
    */
   reportUpdater(fn: (report: any) => any) {
     return this.on(GameEvents.REPORT_UPDATE, (x) => Object.assign(x, fn(x)), { objectify: true }) as Listener;
+  }
+
+  /**
+   * Track an event with metadata
+   * @param event - Event name
+   * @param metadata - Additional data to attach to the event
+   */
+  track(event: string, metadata: any = {}) {
+    this.events.push({ event, metadata, time: diffTime(this.sessionStartTime) });
+    this.emit(event);
+  }
+
+  /**
+   * Get all tracked events
+   * @returns Array of tracked events
+   */
+  getEvents() {
+    return this.events;
   }
 }
