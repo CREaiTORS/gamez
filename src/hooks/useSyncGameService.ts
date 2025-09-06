@@ -1,7 +1,13 @@
 import { useEffect } from "react";
-import { GameService } from "../lib";
+import { useGameService } from "../contexts/game-service-context";
 
-export function useSyncGameService(gs: GameService) {
+/**
+ * Hook to synchronize the game service session with the component lifecycle.
+ * Automatically resumes the session on mount and pauses it on unmount.
+ */
+export function useSyncGameService() {
+  const gs = useGameService();
+
   useEffect(() => {
     const session = gs.getSession();
     // Resume the session if it is not already active
