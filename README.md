@@ -48,11 +48,7 @@ const assets = {
 };
 
 // Initialize game service
-const gs = new gs(
-  "my-awesome-game",
-  levels,
-  assets,
-);
+const gs = new GameService("my-awesome-game", levels, assets);
 
 // Usage example
 async function startGame() {
@@ -75,11 +71,11 @@ async function startGame() {
   }
 
   // Handle game completion
-  gs.onSessionEnd((status) => {
+  gs.addSessionEndListener((status) => {
     console.log(`Game ended with status: ${status}`);
 
     // Collect results for analytics or score tracking
-    const results = gs.collectResults();
+    const results = gs.collectReport();
 
     // Move to next level
     if (status === "success") {
@@ -108,3 +104,26 @@ async function startGame() {
 - **Asset Preloading**: Ensure all assets are ready before gameplay begins
 - **Event System**: Subscribe to game lifecycle events
 - **Results Tracking**: Collect and process game results for analytics
+- **Error Handling**: Comprehensive error boundaries and recovery mechanisms
+- **Performance Optimization**: Efficient React hooks and memory management
+- **TypeScript Support**: Full type safety with generic constraints
+
+## Documentation
+
+See the [docs](/docs) folder for comprehensive documentation:
+
+- [Architecture Guide](/docs/ARCHITECTURE.md) - System design and architectural decisions
+- [API Reference](/docs/API.md) - Complete API documentation with examples
+
+## Development
+
+```bash
+# Run tests
+npm test
+
+# Build library
+npm run build
+
+# Development server
+npm run dev
+```
