@@ -14,16 +14,6 @@ export function sleep(time: number) {
   return new Promise((res) => setTimeout(res, time));
 }
 
-/**
- *
- * @param startTime epoch time
- * @param delay in ms
- * @returns
- */
-export function diffTime(startTime: number, delay = 0) {
-  return (Date.now() - startTime - delay) / 1000;
-}
-
 export function vibrate(duration = 100) {
   try {
     navigator.vibrate(duration);
