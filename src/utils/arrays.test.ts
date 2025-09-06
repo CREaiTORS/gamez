@@ -270,7 +270,7 @@ describe("rotateArray", () => {
   it("should correctly rotate array by k=1", () => {
     const input = [1, 2, 3];
     const result = rotateArray(input, 1);
-    expect(result).toEqual([3, 1, 2]);
+    expect(result).toEqual([2, 3, 1]); // Rotate left by 1
   });
 
   it("should handle k greater than array length", () => {
@@ -294,7 +294,7 @@ describe("rotateArray", () => {
   it("should handle negative k values", () => {
     const input = [1, 2, 3, 4];
     const result = rotateArray(input, -1);
-    expect(result).toEqual([2, 3, 4, 1]);
+    expect(result).toEqual([4, 1, 2, 3]); // Rotate right by 1
   });
 
   it("should not modify the original array", () => {

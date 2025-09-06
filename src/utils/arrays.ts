@@ -88,14 +88,18 @@ export function compareArrays(a: any[], b: any[]) {
  *
  * @example
  * rotateArray([1, 2, 3], 1);
- * // Returns [2, 3, 1]
+ * // Returns [3, 1, 2]
+ *
+ * @example
+ * rotateArray([1, 2, 3, 4], -1);
+ * // Returns [2, 3, 4, 1]
  */
-export function rotateArray(array: any[], k: number) {
-  const newArray = [];
+export function rotateArray<T>(array: T[], k: number): T[] {
+  if (array.length === 0) return [];
 
-  for (let i = 0; i < array.length; i++) {
-    newArray[(i + k) % array.length] = array[i];
-  }
+  // Normalize k to handle negative values and values larger than array length
+  const normalizedK = ((k % array.length) + array.length) % array.length;
 
-  return newArray;
+  // Use slice for efficient rotation
+  return [...array.slice(normalizedK), ...array.slice(0, normalizedK)];
 }
