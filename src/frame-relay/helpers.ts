@@ -51,15 +51,6 @@ export function parseIncomingMessage(messageEvent: MessageEvent): MessageParseRe
 }
 
 /**
- * Legacy function for backward compatibility
- * @deprecated Use parseIncomingMessage instead
- */
-export function parseMessage(event: MessageEvent): FrameRelayMessage | null {
-  const result = parseIncomingMessage(event);
-  return result.success ? result.message! : null;
-}
-
-/**
  * Validates that a parsed object conforms to the FrameRelayMessage interface
  */
 function isValidMessageStructure(obj: unknown): obj is FrameRelayMessage {
@@ -86,14 +77,6 @@ function isValidMessageStructure(obj: unknown): obj is FrameRelayMessage {
  */
 export function validateTrustedOrigin(originUrl: URL): boolean {
   return TRUSTED_ORIGIN_PATTERNS.some((pattern) => isHostMatchingPattern(pattern, originUrl.host));
-}
-
-/**
- * Legacy function for backward compatibility
- * @deprecated Use validateTrustedOrigin instead
- */
-export function validateOrigin(url: URL): boolean {
-  return validateTrustedOrigin(url);
 }
 
 /**
@@ -130,14 +113,6 @@ export function getSecureWindowReference(): Window {
 }
 
 /**
- * Legacy function for backward compatibility
- * @deprecated Use getSecureWindowReference instead
- */
-export function ssrSafeWindow(): Window {
-  return getSecureWindowReference();
-}
-
-/**
  * Attempts to determine the origin of the parent window
  * Falls back to wildcard if origin cannot be determined
  * @returns The parent origin URL or "*" as fallback
@@ -156,12 +131,4 @@ export function extractParentOrigin(): string {
     console.warn("Failed to parse referrer URL:", error);
     return "*";
   }
-}
-
-/**
- * Legacy function for backward compatibility
- * @deprecated Use extractParentOrigin instead
- */
-export function getOrigin(): string {
-  return extractParentOrigin();
 }

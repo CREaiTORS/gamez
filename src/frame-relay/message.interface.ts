@@ -95,9 +95,3 @@ export interface RequestMessage extends FrameRelayMessage {
   readonly type: MessageType.REQUEST;
   readonly id: string;
 }
-
-/**
- * Legacy type alias for backward compatibility
- * @deprecated Use FrameRelayMessage instead
- */
-export type Message = FrameRelayMessage;

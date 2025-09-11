@@ -294,30 +294,4 @@ export class IFrameController {
   public isReady(): boolean {
     return this.lifecycleState === IFrameLifecycleState.COMMUNICATION_READY;
   }
-
-  // Legacy methods for backward compatibility
-  /** @deprecated Use initializeIFrame instead */
-  async init(iframe: HTMLIFrameElement): Promise<void> {
-    return this.initializeIFrame(iframe);
-  }
-
-  /** @deprecated Use startGameSession instead */
-  start(): void {
-    this.startGameSession();
-  }
-
-  /** @deprecated Use stopGameSession instead */
-  stop(): void {
-    this.stopGameSession();
-  }
-
-  /** @deprecated Use terminateIFrame instead */
-  terminate(): void {
-    this.terminateIFrame();
-  }
-
-  /** @deprecated Use synchronizeState instead */
-  syncState(method: StateSynchronizationMethod, payload: unknown): void {
-    this.synchronizeState(method, payload);
-  }
 }

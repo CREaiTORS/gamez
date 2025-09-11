@@ -107,14 +107,6 @@ export function cleanupCommunication(): void {
 }
 
 /**
- * Legacy function for backward compatibility
- * @deprecated Use cleanupCommunication instead
- */
-export function uninitializeCommunication(): void {
-  cleanupCommunication();
-}
-
-/**
  * Sends a message to the parent window and returns a Promise for the response
  * @param messageType - The type of message to send
  * @param methodName - The specific method within the message type

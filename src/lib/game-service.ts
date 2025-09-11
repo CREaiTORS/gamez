@@ -276,15 +276,6 @@ export class GameService<T extends string = string> extends EventEmitter2 {
   /**
    * Add a listener for session end events
    * @param fn - Callback function for session end
-   * @deprecated Use addSessionEndListener instead (typo in method name)
-   */
-  addSessionEndListner(fn: (result: ResultType) => void) {
-    this.on(GameEvents.SESSION_END, fn, { objectify: true }) as Listener;
-  }
-
-  /**
-   * Add a listener for session end events
-   * @param fn - Callback function for session end
    */
   addSessionEndListener(fn: (result: ResultType) => void) {
     this.on(GameEvents.SESSION_END, fn, { objectify: true }) as Listener;

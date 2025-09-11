@@ -60,11 +60,3 @@ export class FrameRelayNavigationActions {
     }
   }
 }
-
-/**
- * Legacy function for backward compatibility
- * @deprecated Use FrameRelayNavigationActions.requestNavigateBack() instead
- */
-export function navigateBack(): void {
-  FrameRelayNavigationActions.requestNavigateBack();
-}

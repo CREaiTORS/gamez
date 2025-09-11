@@ -118,27 +118,4 @@ export class CommunicationHub {
   isReady(): boolean {
     return this.isInitialized;
   }
-
-  // Legacy methods for backward compatibility
-  /** @deprecated Use establishCommunication instead */
-  async initialize(): Promise<string[]> {
-    return this.establishCommunication();
-  }
-
-  /** @deprecated Use terminateCommunication instead */
-  uninitialize(): void {
-    this.terminateCommunication();
-  }
-
-  /** @deprecated Use sendAsyncMessage instead */
-  sendMessageToParentAsync<TResponse>(
-    ...args: Parameters<typeof sendMessageToParentAsync<TResponse>>
-  ): Promise<TResponse> {
-    return sendMessageToParentAsync<TResponse>(...args);
-  }
-
-  /** @deprecated Use sendMessage instead */
-  sendMessageToParent(...args: Parameters<typeof sendMessageToParent>): void {
-    sendMessageToParent(...args);
-  }
 }
