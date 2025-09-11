@@ -82,7 +82,7 @@ export class CommunicationHub {
    * @param payload - Optional data payload
    * @returns Promise that resolves with the response
    */
-  async sendAsyncMessage<TResponse>(messageType: MessageType, method: string, payload?: unknown[]): Promise<TResponse> {
+  async sendAsyncMessage<TResponse>(messageType: MessageType, method: string, payload?: unknown): Promise<TResponse> {
     if (!this.isInitialized) {
       throw new Error("Communication not established. Call establishCommunication() first.");
     }
@@ -101,7 +101,7 @@ export class CommunicationHub {
   sendMessage(
     messageType: MessageType,
     method: string,
-    payload?: unknown[],
+    payload?: unknown,
     callback?: (response?: unknown) => void
   ): void {
     if (!this.isInitialized) {

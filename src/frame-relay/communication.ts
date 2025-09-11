@@ -116,7 +116,7 @@ export function cleanupCommunication(): void {
 export async function sendMessageToParentAsync<TResponse>(
   messageType: MessageType,
   methodName: string,
-  payload?: unknown[]
+  payload?: unknown
 ): Promise<TResponse> {
   const message = createOutgoingMessage(messageType, methodName, payload);
 
@@ -145,7 +145,7 @@ export async function sendMessageToParentAsync<TResponse>(
 export function sendMessageToParent(
   messageType: MessageType,
   methodName: string,
-  payload?: unknown[],
+  payload?: unknown,
   callback?: (response?: unknown) => void
 ): void {
   const message = createOutgoingMessage(messageType, methodName, payload);
@@ -160,12 +160,12 @@ export function sendMessageToParent(
 /**
  * Creates a properly formatted outgoing message
  */
-function createOutgoingMessage(messageType: MessageType, methodName: string, payload?: unknown[]): FrameRelayMessage {
+function createOutgoingMessage(messageType: MessageType, methodName: string, payload?: unknown): FrameRelayMessage {
   return {
     id: communicationState.generateMessageId(),
     type: messageType,
     method: methodName as any, // Type assertion needed due to union complexity
-    payload: payload || [],
+    payload,
   };
 }
 
