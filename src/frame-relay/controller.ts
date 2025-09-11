@@ -1,6 +1,6 @@
 import { AbstractMessageHandler } from "./message-handler";
 import {
-  GameLifecycleMethod,
+  GameMethod,
   MessageType,
   SystemControlMethod,
   type FrameRelayMessage,
@@ -227,7 +227,7 @@ export class IFrameController {
   public startGameSession(): void {
     this.log("Starting game session");
     this.sendMessage(MessageType.GAME, {
-      method: GameLifecycleMethod.START_SESSION,
+      method: GameMethod.START_SESSION,
     });
   }
 
@@ -237,7 +237,7 @@ export class IFrameController {
   public stopGameSession(): void {
     this.log("Stopping game session");
     this.sendMessage(MessageType.GAME, {
-      method: GameLifecycleMethod.STOP_SESSION,
+      method: GameMethod.STOP_SESSION,
     });
   }
 

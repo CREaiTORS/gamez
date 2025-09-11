@@ -7,7 +7,7 @@ export enum MessageType {
   CONTROL = "control",
   /** Error reporting and propagation */
   ERROR = "error",
-  /** Game lifecycle and command messages */
+  /** Game command messages */
   GAME = "game",
   /** Data request/response messages */
   REQUEST = "request",
@@ -16,9 +16,9 @@ export enum MessageType {
 }
 
 /**
- * Game-specific methods for controlling game lifecycle
+ * Game-specific methods for controlling game
  */
-export enum GameLifecycleMethod {
+export enum GameMethod {
   START_SESSION = "start",
   STOP_SESSION = "stop",
   END_SESSION = "end",
@@ -44,7 +44,7 @@ export enum StateSynchronizationMethod {
 /**
  * Union type for all possible method values
  */
-export type MessageMethod = GameLifecycleMethod | SystemControlMethod | StateSynchronizationMethod;
+export type MessageMethod = GameMethod | SystemControlMethod | StateSynchronizationMethod;
 
 /**
  * Core message structure for frame relay communication
@@ -73,7 +73,7 @@ export interface ControlMessage extends FrameRelayMessage {
 
 export interface GameMessage extends FrameRelayMessage {
   readonly type: MessageType.GAME;
-  readonly method: GameLifecycleMethod;
+  readonly method: GameMethod;
 }
 
 export interface SyncMessage extends FrameRelayMessage {

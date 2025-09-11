@@ -15,12 +15,4 @@ export * from "./hub-store";
 export * from "./actions";
 export * from "./setup";
 
-export {
-  SystemControlMethod as ControlMethod,
-  GameLifecycleMethod as GameMethod,
-  StateSynchronizationMethod as SyncState,
-} from "./message.interface";
-
-export { CommunicationHub as Hub } from "./hub";
-
 export { IFrameController } from "./controller";
