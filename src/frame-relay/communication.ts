@@ -47,7 +47,7 @@ const communicationState = new CommunicationState();
  * @param messageHandler - Handler for processing incoming messages
  * @returns Promise that resolves when communication is established
  */
-export async function initializeCommunication(messageHandler: AbstractMessageHandler): Promise<string[]> {
+export async function initializeCommunication(messageHandler: AbstractMessageHandler): Promise<unknown> {
   try {
     communicationState.currentWindow = getSecureWindowReference();
 
@@ -65,7 +65,7 @@ export async function initializeCommunication(messageHandler: AbstractMessageHan
     // Attempt handshake with parent
     communicationState.parentOrigin = extractParentOrigin();
 
-    return sendMessageToParentAsync<string[]>(MessageType.CONTROL, SystemControlMethod.INITIALIZE_CONNECTION);
+    return sendMessageToParentAsync(MessageType.CONTROL, SystemControlMethod.INITIALIZE_CONNECTION);
   } catch (error) {
     // Clean up on failure
     cleanupCommunication();
@@ -188,14 +188,13 @@ function dispatchMessageToParent(message: FrameRelayMessage): void {
 function createIncomingMessageListener(messageHandler: AbstractMessageHandler) {
   return async function handleIncomingMessage(event: MessageEvent): Promise<void> {
     // Validate message structure and origin
+    if (!shouldProcessMessage(event.source, event.origin)) {
+      console.warn("Message rejected from untrusted source:", event.origin);
+      return;
+    }
     const parseResult = parseIncomingMessage(event);
     if (!parseResult.success) {
       console.warn("Failed to parse incoming message:", parseResult.error);
-      return;
-    }
-
-    if (!shouldProcessMessage(event.source, event.origin)) {
-      console.warn("Message rejected from untrusted source:", event.origin);
       return;
     }
 

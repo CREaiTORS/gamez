@@ -1,7 +1,7 @@
 import { GameService } from "../lib/game-service";
 import { createCommunicationHub } from "./hub-store";
 import { MessageHandler } from "./message-handler";
-import { FrameRelayMessage, GameLifecycleMethod, StateSynchronizationMethod } from "./message.interface";
+import { FrameRelayMessage, StateSynchronizationMethod } from "./message.interface";
 
 /**
  * Configuration options for frame relay setup
@@ -40,31 +40,16 @@ class GameServiceMessageHandler extends MessageHandler {
  * @param config - Optional configuration for setup
  * @returns Promise that resolves with the configured message handler when ready
  */
-export async function setupFrameRelay(
-  gameService: GameService,
+export async function initializeFrameRelay(
+  messageHandler: MessageHandler,
   config: FrameRelaySetupConfig = {}
-): Promise<MessageHandler> {
-  return new Promise<MessageHandler>((resolve, reject) => {
-    const messageHandler = new GameServiceMessageHandler(gameService);
-
+): Promise<unknown> {
+  return new Promise((resolve, reject) => {
     // Set timeout for initialization
     const timeoutMs = config.initializationTimeoutMs ?? 60000;
     const timeoutId = setTimeout(() => {
       reject(new Error(`Frame relay setup timeout after ${timeoutMs}ms`));
     }, timeoutMs);
-
-    // Handle game lifecycle messages
-    messageHandler.onGameMessage = (message: FrameRelayMessage) => {
-      switch (message.method) {
-        case GameLifecycleMethod.START_SESSION:
-          clearTimeout(timeoutId);
-          resolve(messageHandler);
-          break;
-        default:
-          // Other game messages can be handled here if needed
-          break;
-      }
-    };
 
     // Create and initialize communication hub
     const communicationHub = createCommunicationHub(messageHandler, {
@@ -73,10 +58,16 @@ export async function setupFrameRelay(
     });
 
     // Initialize communication
-    communicationHub.establishCommunication().catch((error) => {
-      clearTimeout(timeoutId);
-      reject(error);
-    });
+    communicationHub
+      .establishCommunication()
+      .then((value) => {
+        communicationHub;
+        resolve(value);
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      });
   });
 }
 

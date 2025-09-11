@@ -34,7 +34,7 @@ export class CommunicationHub {
    * Logs messages with hub prefix if logging is enabled
    */
   private log(...args: unknown[]): void {
-    if (this.config.enableLogging !== false) {
+    if (this.config.enableLogging) {
       console.log("[CommunicationHub]:", ...args);
     }
   }
@@ -43,7 +43,7 @@ export class CommunicationHub {
    * Establishes communication with the parent window
    * @returns Promise that resolves when communication is ready
    */
-  async establishCommunication(): Promise<string[]> {
+  async establishCommunication(): Promise<unknown> {
     if (this.isInitialized) {
       this.log("Communication already established");
       return [];
