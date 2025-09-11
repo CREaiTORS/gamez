@@ -15,9 +15,6 @@ export * from "./hub-store";
 export * from "./actions";
 export * from "./setup";
 
-// Legacy type exports for backward compatibility
-export type { FrameRelayMessage as Message } from "./message.interface";
-
 export {
   SystemControlMethod as ControlMethod,
   GameLifecycleMethod as GameMethod,

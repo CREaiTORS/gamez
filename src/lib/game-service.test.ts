@@ -182,7 +182,7 @@ describe("GameService", () => {
   test("should add session end listener", () => {
     const sessionEndListener = jest.fn();
 
-    gameService.addSessionEndListner(sessionEndListener);
+    gameService.addSessionEndListener(sessionEndListener);
     gameService.startSession();
     gameService.endSession("success");
 
