@@ -20,9 +20,9 @@ export enum MessageType {
  */
 export enum GameMethod {
   START_SESSION = "start",
-  STOP_SESSION = "stop",
+  PAUSE_SESSION = "pause",
+  RESUME_SESSION = "resume",
   END_SESSION = "end",
-  COLLECT_REPORT = "report",
 }
 
 /**
@@ -34,17 +34,9 @@ export enum SystemControlMethod {
 }
 
 /**
- * State synchronization methods for keeping parent and child in sync
- */
-export enum StateSynchronizationMethod {
-  SYNC_LEVELS = "levels",
-  SYNC_CURRENT_LEVEL = "currLevel",
-}
-
-/**
  * Union type for all possible method values
  */
-export type MessageMethod = GameMethod | SystemControlMethod | StateSynchronizationMethod;
+export type MessageMethod<T extends string = string> = T;
 
 /**
  * Core message structure for frame relay communication
@@ -68,17 +60,17 @@ export interface FrameRelayMessage {
  */
 export interface ControlMessage extends FrameRelayMessage {
   readonly type: MessageType.CONTROL;
-  readonly method: SystemControlMethod;
+  readonly method: MessageMethod<SystemControlMethod>;
 }
 
 export interface GameMessage extends FrameRelayMessage {
   readonly type: MessageType.GAME;
-  readonly method: GameMethod;
+  readonly method: MessageMethod<GameMethod>;
 }
 
 export interface SyncMessage extends FrameRelayMessage {
   readonly type: MessageType.SYNC;
-  readonly method: StateSynchronizationMethod;
+  readonly method: MessageMethod;
 }
 
 export interface ErrorMessage extends FrameRelayMessage {

@@ -1,10 +1,10 @@
 import { AbstractMessageHandler } from "./message-handler";
 import {
   GameMethod,
+  MessageMethod,
   MessageType,
   SystemControlMethod,
   type FrameRelayMessage,
-  type StateSynchronizationMethod,
 } from "./message.interface";
 
 /**
@@ -234,10 +234,10 @@ export class IFrameController {
   /**
    * Stops the game session in the iframe
    */
-  public stopGameSession(): void {
+  public endGameSession(): void {
     this.log("Stopping game session");
     this.sendMessage(MessageType.GAME, {
-      method: GameMethod.STOP_SESSION,
+      method: GameMethod.END_SESSION,
     });
   }
 
@@ -246,7 +246,7 @@ export class IFrameController {
    * @param synchronizationMethod - The type of state to synchronize
    * @param payload - The state data to send
    */
-  public synchronizeState(synchronizationMethod: StateSynchronizationMethod, payload: unknown): void {
+  public synchronizeState(synchronizationMethod: MessageMethod, payload: unknown): void {
     this.log("Synchronizing state:", synchronizationMethod, payload);
     this.sendMessage(MessageType.SYNC, {
       method: synchronizationMethod,
