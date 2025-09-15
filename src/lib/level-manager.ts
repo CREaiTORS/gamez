@@ -41,7 +41,7 @@ export function createLevelManager(levels: any[], logger: Logger): LevelManager 
      * Check if all levels are completed
      */
     isGameComplete() {
-      return currLevel + 1 >= levels.length;
+      return currLevel >= levels.length;
     },
 
     /**
