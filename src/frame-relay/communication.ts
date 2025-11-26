@@ -14,6 +14,7 @@ export class CommunicationState {
   public nextMessageId: number = 0;
   public pendingCallbacks: Map<string, (response?: unknown) => void> = new Map();
   public messageListener: ((event: MessageEvent) => void) | null = null;
+  public trustedOrigins: readonly string[] = ["localhost"];
 
   /**
    * Resets all communication state to initial values
@@ -47,7 +48,10 @@ const communicationState = new CommunicationState();
  * @param messageHandler - Handler for processing incoming messages
  * @returns Promise that resolves when communication is established
  */
-export async function initializeCommunication(messageHandler: AbstractMessageHandler): Promise<unknown> {
+export async function initializeCommunication(
+  messageHandler: AbstractMessageHandler,
+  trustedOrigins?: readonly string[]
+): Promise<unknown> {
   try {
     communicationState.currentWindow = getSecureWindowReference();
 
@@ -57,6 +61,9 @@ export async function initializeCommunication(messageHandler: AbstractMessageHan
     }
 
     communicationState.parentWindow = parentWindow;
+    if (trustedOrigins) {
+      communicationState.trustedOrigins = trustedOrigins;
+    }
 
     // Set up message listener before attempting handshake
     communicationState.messageListener = createIncomingMessageListener(messageHandler);
@@ -225,7 +232,7 @@ function shouldProcessMessage(messageSource: MessageEventSource | null, messageO
   // Validate against trusted origins
   try {
     const originUrl = new URL(messageOrigin);
-    return validateTrustedOrigin(originUrl);
+    return validateTrustedOrigin(originUrl, communicationState.trustedOrigins);
   } catch (error) {
     console.warn("Invalid message origin:", messageOrigin, error);
     return false;

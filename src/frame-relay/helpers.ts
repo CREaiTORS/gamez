@@ -1,12 +1,6 @@
 import { type FrameRelayMessage } from "./message.interface";
 
 /**
- * Trusted origins configuration for frame relay communication
- * These domains are allowed to communicate with the iframe
- */
-const TRUSTED_ORIGIN_PATTERNS = ["revitalaize.vercel.app", "localhost:3000", "revitalaize-games.netlify.app"] as const;
-
-/**
  * Parsing result for message deserialization
  */
 export interface MessageParseResult {
@@ -75,8 +69,8 @@ function isValidMessageStructure(obj: unknown): obj is FrameRelayMessage {
  * @param originUrl - The URL object to validate
  * @returns true if the origin is trusted, false otherwise
  */
-export function validateTrustedOrigin(originUrl: URL): boolean {
-  return TRUSTED_ORIGIN_PATTERNS.some((pattern) => isHostMatchingPattern(pattern, originUrl.host));
+export function validateTrustedOrigin(originUrl: URL, trustedOrigins: readonly string[]): boolean {
+  return trustedOrigins.some((pattern) => isHostMatchingPattern(pattern, originUrl.host));
 }
 
 /**
