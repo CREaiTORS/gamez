@@ -1,15 +1,11 @@
+import { CommunicationHubConfig } from "./hub";
 import { createCommunicationHub } from "./hub-store";
 import { MessageHandler } from "./message-handler";
 
 /**
  * Configuration options for frame relay setup
  */
-export interface FrameRelaySetupConfig {
-  /** Timeout for initialization in milliseconds */
-  readonly initializationTimeoutMs?: number;
-  /** Whether to enable debug logging */
-  readonly enableLogging?: boolean;
-}
+export interface FrameRelaySetupConfig extends Partial<CommunicationHubConfig> {}
 
 /**
  * Sets up frame relay communication with the game service
@@ -34,6 +30,7 @@ export async function initializeFrameRelay(
     const communicationHub = createCommunicationHub(messageHandler, {
       enableLogging: config.enableLogging,
       initializationTimeoutMs: config.initializationTimeoutMs,
+      trustedOrigins: config.trustedOrigins,
     });
 
     // Initialize communication

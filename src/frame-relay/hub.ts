@@ -15,6 +15,8 @@ export interface CommunicationHubConfig {
   readonly enableLogging?: boolean;
   /** Timeout for initialization in milliseconds */
   readonly initializationTimeoutMs?: number;
+  /** List of trusted origins for security */
+  readonly trustedOrigins?: string[];
 }
 
 /**
@@ -51,7 +53,7 @@ export class CommunicationHub {
 
     try {
       this.log("Establishing communication with parent window");
-      const result = await initializeCommunication(this.messageHandler);
+      const result = await initializeCommunication(this.messageHandler, this.config.trustedOrigins);
       this.isInitialized = true;
       this.log("Communication established successfully");
       return result;
