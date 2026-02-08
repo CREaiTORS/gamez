@@ -31,6 +31,7 @@ export enum GameMethod {
 export enum SystemControlMethod {
   INITIALIZE_CONNECTION = "init",
   NAVIGATE_BACK = "back",
+  SESSION_COMPLETE = "complete",
 }
 
 /**

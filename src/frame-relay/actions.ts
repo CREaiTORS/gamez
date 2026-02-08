@@ -59,4 +59,18 @@ export class FrameRelayNavigationActions {
       throw error;
     }
   }
+
+  static async requestSessionCompleteAsync(): Promise<unknown> {
+    try {
+      const hub = getCommunicationHub();
+      if (!hub.isReady()) {
+        throw new Error("Communication hub not ready");
+      }
+
+      return await hub.sendAsyncMessage(MessageType.CONTROL, SystemControlMethod.SESSION_COMPLETE);
+    } catch (error) {
+      console.error("Failed to request session complete:", error);
+      throw error;
+    }
+  }
 }
