@@ -2,10 +2,10 @@ import { getCommunicationHub } from "./hub-store";
 import { MessageType, SystemControlMethod } from "./message.interface";
 
 /**
- * Navigation actions for iframe communication
+ * Actions for iframe communication
  * Provides high-level actions that can be called from within an iframe
  */
-export class FrameRelayNavigationActions {
+export class FrameRelayActions {
   /**
    * Requests the parent window to navigate back
    * Typically used when a game or iframe content wants to return to the previous view
